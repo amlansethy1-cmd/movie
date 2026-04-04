@@ -1,0 +1,446 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="description" content="Cine Underground — Search movies & web series. Instant Telegram access."><meta property="og:title" content="Cine Underground"><title>CINE UNDERGROUND • Underground Cinema. No Limits.</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script><script type="module" src="https://unpkg.com/@splinetool/viewer@1.0.51/build/spline-viewer.js"></script><style>
+*{margin:0;padding:0;box-sizing:border-box;cursor:none!important}:root{--bg:#070707;--bg2:#0D0D0D;--card:#111111;--acc:#FF3D00;--acc2:#FF6B35;--glow:rgba(255,61,0,0.2);--glass:rgba(255,255,255,0.03);--gb:rgba(255,255,255,0.07);--t:#fff;--t2:#888;--t3:#444;--bdr:#1A1A1A;--ambient:transparent}html{scroll-behavior:auto}
+body{background:var(--bg);color:var(--t);font-family:'Montserrat',sans-serif;overflow-x:hidden;line-height:1}h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+/* CRT Glitch & Ambient Glow */
+#ambient-glow{position:fixed;inset:0;background:radial-gradient(circle 800px at 50% 50%, var(--ambient), transparent 70%);opacity:0.15;z-index:0;pointer-events:none;transition:background 0.8s ease}
+.crt::before{content:" ";display:block;position:fixed;top:0;left:0;bottom:0;right:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06));z-index:9990;background-size:100% 2px,3px 100%;pointer-events:none;opacity:0.3}
+/* Spline 3D & ThreeJS */
+canvas#bg{position:fixed;inset:0;z-index:1;pointer-events:none}
+spline-viewer{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100vw;height:120vh;z-index:1;opacity:0.4;pointer-events:none}
+/* Cursor */
+#cdot{position:fixed;width:6px;height:6px;background:var(--t);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 20px #fff;will-change:left,top,transform}
+#cring{position:fixed;width:40px;height:40px;border:1px solid rgba(255,255,255,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .2s,height .2s,opacity .2s,transform .15s cubic-bezier(.23,1,.32,1);will-change:left,top}
+/* Loader */
+#loader{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s ease}
+.ll-logo{font-family:'Bebas Neue',sans-serif;font-size:54px;letter-spacing:6px;color:#fff;margin-bottom:6px;opacity:0;transform:translateY(22px);transition:all .7s ease}.ll-logo span{color:var(--acc)}.ll-sub{font-size:10px;letter-spacing:4px;color:var(--t3);margin-bottom:52px;opacity:0;transition:all .7s ease .25s}.ll-bar-wrap{width:220px;height:2px;background:#1a1a1a;border-radius:2px;overflow:hidden}.ll-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .05s linear}.ll-pct{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--acc);margin-top:18px;letter-spacing:2px}
+/* Nav */
+nav{position:fixed;top:0;width:100%;height:72px;display:flex;align-items:center;padding:0 48px;z-index:1000;transition:all .4s ease;opacity:0}nav.vis{opacity:1}nav.scrolled{background:rgba(7,7,7,0.8);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--gb)}.nlogo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}.nlogo-text{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px}.nlogo-text span{color:var(--acc)}.nright{margin-left:auto;display:flex;align-items:center;gap:28px}.nlink{font-size:11px;font-weight:500;letter-spacing:2px;color:var(--t2);text-decoration:none;transition:color .2s}.nlink:hover{color:var(--acc)}.nbtn{background:transparent;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;padding:10px 26px;border-radius:6px;border:1px solid var(--acc);cursor:none;transition:all .3s ease;position:relative;overflow:hidden;backdrop-filter:blur(10px)}.nbtn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--acc),var(--acc2));z-index:-1;transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.23,1,.32,1)}.nbtn:hover::after{transform:scaleX(1)}.nbtn:hover{color:#000;border-color:transparent;box-shadow:0 0 30px rgba(255,61,0,0.5)}
+/* Hero */
+.hero{min-height:100vh;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;padding:0 20px;overflow:hidden}
+.hcontent{position:relative;z-index:3;max-width:920px;text-align:center;width:100%;opacity:0;transform:translateY(40px);transition:opacity 1.2s cubic-bezier(.23,1,.32,1),transform 1.2s cubic-bezier(.23,1,.32,1)}.hcontent.vis{opacity:1;transform:translateY(0)}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(12px);color:var(--t);font-size:10px;font-weight:600;letter-spacing:3px;padding:8px 20px;border-radius:100px;margin-bottom:30px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.headline{font-family:'Bebas Neue',sans-serif;font-size:clamp(62px,10.5vw,140px);line-height:0.85;letter-spacing:2px;margin-bottom:30px;text-transform:uppercase}
+.flip-wrap{display:inline-block;perspective:1000px;vertical-align:bottom}.flip-word{display:inline-block;color:var(--t);will-change:transform;text-shadow:0 0 10px rgba(255,255,255,0.3);position:relative}
+.flip-word::after{content:'';position:absolute;bottom:4px;left:0;width:100%;height:4px;background:var(--acc);box-shadow:0 0 20px var(--acc)}
+.hsub{font-size:15px;font-weight:300;color:var(--t2);line-height:1.85;max-width:500px;margin:0 auto 46px}
+.sbar{max-width:640px;margin:0 auto 30px;position:relative}
+.sbox{background:rgba(10,10,10,0.6);border:1px solid var(--gb);border-radius:14px;backdrop-filter:blur(30px);padding:6px;display:flex;align-items:center;transition:all .4s}.sbox:focus-within{border-color:rgba(255,255,255,0.2);box-shadow:0 0 40px rgba(255,255,255,0.05),0 24px 64px rgba(0,0,0,0.5)}.sicon{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:#555;width:18px;height:18px;flex-shrink:0}.sinput{flex:1;background:transparent;border:none;outline:none;padding:14px 14px 14px 56px;font-family:'Montserrat',sans-serif;font-size:15px;color:#fff}.sinput::placeholder{color:#444}
+.sbtn{background:#fff;color:#000;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;padding:13px 30px;border-radius:9px;border:none;cursor:none;transition:all .3s ease;flex-shrink:0}.sbtn:hover{background:var(--acc);color:#fff;transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,61,0,0.4)}
+.pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.pill{border:1px solid var(--bdr);border-radius:100px;padding:8px 20px;font-size:11px;font-weight:600;color:var(--t2);background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);transition:all .3s ease;cursor:none;letter-spacing:.5px;white-space:nowrap}.pill.active{background:#fff;color:#000;border-color:#fff}.pill:hover:not(.active){border-color:var(--acc);color:#fff;background:rgba(255,61,0,0.1)}
+/* Stats */
+.stats{background:var(--bg2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:34px;position:relative;z-index:2}.stwrap{max-width:900px;margin:0 auto;display:flex;justify-content:center;gap:80px;align-items:center}.stitem{display:flex;flex-direction:column;align-items:center;gap:4px}.stval{font-family:'Bebas Neue',sans-serif;font-size:40px;color:#fff;line-height:1}.stlbl{font-size:9px;font-weight:600;letter-spacing:2.5px;color:var(--t2)}.stdiv{width:1px;height:50px;background:var(--bdr)}
+/* Movies Grid (Kinetic Scroll Skew Applied Here via JS) */
+.msec{position:relative;z-index:2;padding:90px 48px;max-width:1500px;margin:0 auto}.mhdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px}.mhl{display:flex;flex-direction:column}.mlbl{font-size:10px;letter-spacing:3px;color:var(--acc);font-weight:700;margin-bottom:4px}.mtitle{font-family:'Bebas Neue',sans-serif;font-size:60px;color:#fff;line-height:1}.macc{width:70px;height:4px;background:#fff;margin-top:12px;border-radius:2px}.mcnt{font-size:12px;color:var(--t2);border:1px solid var(--bdr);padding:8px 18px;border-radius:100px;backdrop-filter:blur(10px)}
+.mgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;perspective:2000px}
+@media(max-width:1400px){.mgrid{grid-template-columns:repeat(4,1fr)}}@media(max-width:1100px){.mgrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.mgrid{grid-template-columns:repeat(2,1fr);gap:16px}}
+/* 3D Card with Video Preview & Liquid Distortion Setup */
+.mcard{background:var(--card);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;cursor:none;transition:border-color .4s,box-shadow .4s;transform-style:preserve-3d;will-change:transform;position:relative}
+.mcard:hover{border-color:rgba(255,255,255,0.2);box-shadow:0 30px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);z-index:10}
+.poster{aspect-ratio:2/3;position:relative;overflow:hidden;background:#0a0a0a;transform-style:preserve-3d}
+.poster img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s cubic-bezier(.23,1,.32,1), filter 0.6s;filter:url(#ripple)} /* SVG Filter Hack for WebGL Liquid feel */
+.mcard:hover .poster img{transform:translateZ(40px) scale(1.1);filter:url(#ripple-active) brightness(0.6)}
+/* Video Hover Preview */
+.poster video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.5s ease;transform:translateZ(20px)}
+.mcard:hover .poster video{opacity:0.8}
+.govl{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,1) 0%,transparent 60%);z-index:2;opacity:0.7;transition:opacity .4s}.mcard:hover .govl{opacity:1}
+.catbadge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);color:#fff;font-size:8px;font-weight:700;letter-spacing:1.5px;padding:6px 12px;border-radius:6px;z-index:3;text-transform:uppercase;border:1px solid rgba(255,255,255,0.05)}
+.cinfo{padding:18px;position:relative;z-index:3;background:linear-gradient(to bottom, transparent, #0a0a0a 20%)}
+.ctitle{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1.1;letter-spacing:1px;margin-bottom:6px;color:#fff}
+.cmeta{font-size:10px;color:var(--t2);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase}
+.cbot{width:100%;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;border-radius:8px;cursor:none;transition:all .3s ease;display:flex;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(5px)}
+.cbot:hover{background:#fff;color:#000;transform:translateY(-3px);box-shadow:0 10px 20px rgba(255,255,255,0.2)}
+/* Footer & Skels (Minified) */
+footer{background:#000;border-top:1px solid var(--bdr);padding:80px 48px 40px;position:relative;z-index:2}.fgrid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:64px}.ftagline{font-size:13px;font-weight:300;color:var(--t2);margin-top:16px;line-height:1.7;max-width:220px}.sicons{display:flex;gap:12px;margin-top:24px}.sico{width:44px;height:44px;border-radius:50%;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;transition:all .3s;color:var(--t2);text-decoration:none}.sico:hover{border-color:#fff;background:#fff;color:#000;transform:translateY(-3px)}.flbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--t3);margin-bottom:20px}.flink{display:block;padding:10px 0;font-size:12px;color:var(--t2);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.02);transition:all .2s}.flink:hover{color:#fff;padding-left:10px;border-color:rgba(255,255,255,0.2)}.fdis{font-size:11px;color:#333;line-height:1.9;font-style:italic}.fbot{max-width:1400px;margin:60px auto 0;padding-top:24px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;font-size:10px;color:var(--t3);letter-spacing:1px}
+.skel{background:var(--card);border:1px solid var(--bdr);border-radius:16px;overflow:hidden}.skel-p{aspect-ratio:2/3;background:linear-gradient(90deg,#0a0a0a 25%,#151515 50%,#0a0a0a 75%);background-size:400% 100%;animation:shim 1.5s ease infinite}.skel-i{padding:18px}.skel-t{height:18px;width:70%;background:linear-gradient(90deg,#111 25%,#222 50%,#111 75%);background-size:400% 100%;animation:shim 1.5s ease infinite;border-radius:4px;margin-bottom:10px}.skel-m{height:10px;width:40%;background:linear-gradient(90deg,#111 25%,#222 50%,#111 75%);animation:shim 1.5s ease infinite;border-radius:3px;margin-bottom:16px}.skel-b{height:42px;background:linear-gradient(90deg,#151515 25%,#2a2a2a 50%,#151515 75%);animation:shim 1.5s ease infinite;border-radius:8px}
+.nores{grid-column:1/-1;text-align:center;padding:120px 20px}.nores h2{font-family:'Bebas Neue',sans-serif;font-size:80px;color:#1a1a1a;margin-bottom:16px}.nores-btn{background:#fff;color:#000;border:none;padding:16px 40px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:none;margin-top:30px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#444;border-radius:2px}*{scrollbar-width:thin;scrollbar-color:#444 var(--bg)}
+@keyframes grain{0%,100%{transform:translate(0,0)}25%{transform:translate(-1%,-1%)}50%{transform:translate(1%,1%)}75%{transform:translate(-1%,1%)}}@keyframes sln{0%,100%{transform:scaleY(1);opacity:1}50%{transform:scaleY(.25);opacity:.25}}@keyframes shim{0%{background-position:-400% 0}100%{background-position:400% 0}}
+@media(max-width:768px){*{cursor:auto!important}#cdot,#cring,.crt{display:none}nav{padding:0 20px;height:64px}.nlogo-text{font-size:18px}.nright{gap:16px}.hero{padding:120px 16px 80px;min-height:auto}.headline{font-size:clamp(46px,13vw,80px)}.sbar{padding:0}.pills{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:12px;scrollbar-width:none}.pills::-webkit-scrollbar{display:none}.stwrap{flex-direction:column;gap:30px}.stdiv{display:none}.msec{padding:60px 16px}.mhdr{flex-direction:column;align-items:flex-start;gap:16px}.mtitle{font-size:50px}.fgrid{grid-template-columns:1fr;gap:40px;text-align:center}.ftagline{max-width:none}.sicons{justify-content:center}.fbot{flex-direction:column;gap:14px;align-items:center}}
+</style></head><body class="crt">
+
+<svg style="width:0;height:0;position:absolute;">
+  <filter id="ripple"><feTurbulence type="fractalNoise" baseFrequency="0.0" numOctaves="1" result="noise" /><feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" /></filter>
+  <filter id="ripple-active"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01;0.03;0.01" dur="4s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" /></filter>
+</svg>
+
+<div id="ambient-glow"></div>
+<canvas id="bg"></canvas>
+<div id="cdot"></div><div id="cring"></div>
+
+<div id="loader">
+    <div class="ll-logo" id="ll">CINE <span>UNDERGROUND</span></div>
+    <div class="ll-sub" id="ls">INITIALIZING NEURAL NETWORK...</div>
+    <div class="ll-bar-wrap"><div class="ll-bar" id="lb"></div></div><div class="ll-pct" id="lp">0%</div>
+</div>
+
+<nav id="nav">
+    <a href="#" class="nlogo">
+        <svg width="28" height="28" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="82" stroke="#fff" stroke-width="14"/><circle cx="100" cy="100" r="52" stroke="#fff" stroke-width="14"/><circle cx="100" cy="100" r="12" fill="#FF3D00"/></svg>
+        <div class="nlogo-text">CINE <span>UNDERGROUND</span></div>
+    </a>
+    <div class="nright">
+        <a href="#msec" class="nlink">DATABASE</a>
+        <button class="nbtn mag-btn" onclick="openChannel()">JOIN NETWORK</button>
+    </div>
+</nav>
+
+<section class="hero" id="hero">
+    <spline-viewer url="https://prod.spline.design/kEqTZfQh6X-yE1v2/scene.splinecode"></spline-viewer>
+    
+    <div class="grain"></div>
+    <div class="hcontent" id="hc">
+        <div class="badge">SECURE TELEGRAM DIRECTORY</div>
+        <div class="headline">FIND YOUR<br>NEXT <span class="flip-wrap"><span id="fw" class="flip-word">OBSESSION</span></span></div>
+        <p class="hsub">Access the ultimate underground cinema vault. High-speed, ad-free Telegram streaming. No limits.</p>
+        <div class="sbar">
+            <div class="sbox" id="sbox">
+                <svg class="sicon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="si" class="sinput" placeholder="Search the mainframe...">
+                <button class="sbtn mag-btn" onclick="doSearch()">EXECUTE</button>
+            </div>
+        </div>
+        <div class="pills" id="pills"></div>
+    </div>
+    <div class="scroll-ind"><div class="scroll-txt">DESCEND</div><div class="scroll-ln"></div></div>
+</section>
+
+<section class="stats">
+    <div class="stwrap">
+        <div class="stitem"><div class="stval">10K+</div><div class="stlbl">FILES INDEXED</div></div><div class="stdiv"></div>
+        <div class="stitem"><div class="stval">0.2s</div><div class="stlbl">BOT RESPONSE</div></div><div class="stdiv"></div>
+        <div class="stitem"><div class="stval">24/7</div><div class="stlbl">UPTIME</div></div>
+    </div>
+</section>
+
+<section class="msec" id="msec">
+    <div class="mhdr">
+        <div class="mhl"><div class="mlbl">MAINFRAME ACCESS</div><div class="mtitle" id="sec-title">ALL TITLES</div><div class="macc"></div></div>
+        <div class="mcnt" id="cnt">Scanning...</div>
+    </div>
+    <div class="mgrid" id="grid"></div>
+</section>
+
+<footer>
+    <div class="fgrid">
+        <div>
+            <a href="#" class="nlogo" style="margin-bottom:10px"><div class="nlogo-text" style="font-size:28px">CINE <span>UNDERGROUND</span></div></a>
+            <p class="ftagline">We don't host. We connect. The ultimate bridge to Telegram's deepest cinematic archives.</p>
+            <div class="sicons">
+                <a href="REPLACE_CHANNEL_LINK" target="_blank" class="sico mag-btn">TG</a>
+                <a href="REPLACE_INSTAGRAM_LINK" target="_blank" class="sico mag-btn">IG</a>
+            </div>
+        </div>
+        <div><div class="flbl">SYSTEM LINKS</div><a href="#" class="flink">Terminal Access (Bot)</a><a href="#" class="flink">Request Data</a><a href="#" class="flink">Network Status</a></div>
+        <div><div class="flbl">DISCLAIMER</div><p class="fdis">Indexing third-party Telegram channels. No media files are stored on this server. Proceed with awareness.</p></div>
+    </div>
+    <div class="fbot"><div>© 2026 CINE UNDERGROUND</div><div>SECURE CONNECTION ESTABLISHED</div></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+// --- ANTI THEFT ---
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.onkeydown=function(e){if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&(e.keyCode==73||e.keyCode==67||e.keyCode==74))||(e.ctrlKey&&e.keyCode==85))return false};
+
+// --- CONFIG & DATA ---
+const _0x1a=["REPLACE_BOT_USERNAME","REPLACE_SHEET_ID","REPLACE_TMDB_KEY","REPLACE_CHANNEL_LINK","REPLACE_INSTAGRAM_LINK","cu_data","cu_p_"];
+const CONFIG={BOT:_0x1a[0],SHEET_ID:_0x1a[1],TMDB:_0x1a[2],CHANNEL:_0x1a[3],INSTAGRAM:_0x1a[4],CACHE:_0x1a[5],POSTER:_0x1a[6],REFRESH:300000};
+
+// AMBIENT GLOW DICTIONARY (High-end Colors per Category)
+const GLOW_COLORS = {"HOLLYWOOD":"#0055ff","BOLLYWOOD":"#ffaa00","WEB SERIES":"#9900ff","SOUTH":"#ff2a00","ANIME":"#ff0066","ALL":"#ffffff"};
+
+const SAMPLE=[
+  {title:"Challengers",category:"HOLLYWOOD",year:"2024",language:"EN",deeplink_keyword:"challengers"},
+  {title:"Dune: Part Two",category:"HOLLYWOOD",year:"2024",language:"EN",deeplink_keyword:"dune-part-two"},
+  {title:"Jujutsu Kaisen",category:"ANIME",year:"2023",language:"JA",deeplink_keyword:"jjk"},
+  {title:"Baby Reindeer",category:"WEB SERIES",year:"2024",language:"EN",deeplink_keyword:"baby-reindeer"},
+  {title:"RRR",category:"SOUTH",year:"2022",language:"TE",deeplink_keyword:"rrr"},
+  {title:"Animal",category:"BOLLYWOOD",year:"2023",language:"HI",deeplink_keyword:"animal"}
+];
+
+let movies=[],filtered=[],cat='ALL',q='';
+let scene,cam,renderer,pGroup,pPos,pVel,pUni,tCamX=0,tCamY=0,mWorld={x:0,y:0,z:0};
+let cursorLight; // Feature 4: Interactive Spotlight
+let lenis; // Feature 3: Kinetic Scroll
+
+// --- AUDIO (Oscillators) ---
+const SFX={
+    click:()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(800,c.currentTime);o.frequency.exponentialRampToValueAtTime(100,c.currentTime+.1);g.gain.setValueAtTime(.1,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.1);o.start();o.stop(c.currentTime+.1)}catch(e){}},
+    hover:()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(300,c.currentTime);g.gain.setValueAtTime(.03,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);o.start();o.stop(c.currentTime+.08)}catch(e){}},
+    shatter:()=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(100,c.currentTime);o.frequency.exponentialRampToValueAtTime(10,c.currentTime+.3);g.gain.setValueAtTime(.05,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3);o.start();o.stop(c.currentTime+.3)}catch(e){}}
+};
+
+function lerp(a,b,t){return a*(1-t)+b*t}
+
+// --- THREE.JS (Upgraded with Spotlight) ---
+function initThree(){
+    const c=document.getElementById('bg'),m=window.innerWidth<768,p=m?80:200;
+    scene=new THREE.Scene();scene.background=new THREE.Color(0x040404);
+    cam=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,100);cam.position.z=8;
+    renderer=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+    renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    
+    // Feature 4: Interactive Cursor Spotlight
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+    scene.add(ambientLight);
+    cursorLight = new THREE.PointLight(0xff3d00, 3, 20); // Bright Orange Light
+    scene.add(cursorLight);
+
+    pGroup=new THREE.Group();scene.add(pGroup);
+    const pA=new Float32Array(p*3),cA=new Float32Array(p*3);pVel=new Float32Array(p*3);
+    for(let i=0;i<p*3;i+=3){
+        pA[i]=(Math.random()-.5)*30;pA[i+1]=(Math.random()-.5)*30;pA[i+2]=(Math.random()-.5)*30;
+        const b=.4+Math.random()*.6;cA[i]=b;cA[i+1]=b;cA[i+2]=b;pVel[i+1]=.002+Math.random()*.005;
+    }
+    pPos=new THREE.BufferAttribute(pA,3);const g=new THREE.BufferGeometry();
+    g.setAttribute('position',pPos);g.setAttribute('color',new THREE.BufferAttribute(cA,3));
+    pUni={uTime:{value:0},uMouse:{value:new THREE.Vector3()}};
+    
+    // Custom Shader for Particles to react to light slightly
+    const mat=new THREE.ShaderMaterial({
+        uniforms:pUni,
+        vertexShader:`uniform float uTime;uniform vec3 uMouse;attribute vec3 color;varying vec3 vColor;void main(){vColor=color;vec3 pos=position;float dist=length(pos-uMouse);if(dist<5.0){pos+=normalize(pos-uMouse)*(5.0-dist)*0.5*sin(uTime);}pos.y+=sin(pos.x*2.0+uTime)*0.2;vec4 mv=modelViewMatrix*vec4(pos,1.0);gl_PointSize=(2.0+sin(uTime*5.0+pos.x)*1.0)*(300.0/-mv.z);gl_Position=projectionMatrix*mv;}`,
+        fragmentShader:`varying vec3 vColor;uniform float uTime;void main(){vec2 uv=gl_PointCoord-vec2(.5);float d=length(uv);if(d>.5)discard;gl_FragColor=vec4(vColor, (1.0-d*2.0)*0.8);}`,
+        transparent:true,depthTest:false,blending:THREE.AdditiveBlending,vertexColors:true
+    });
+    pGroup.add(new THREE.Points(g,mat));
+
+    window.addEventListener('mousemove',e=>{
+        const x=(e.clientX/window.innerWidth)*2-1,y=-(e.clientY/window.innerHeight)*2+1;
+        tCamX=x*1.5;tCamY=y*1.5;mWorld={x:x*12,y:y*10,z:0};
+    });
+
+    let t=0,l=performance.now();
+    function lp(){
+        const n=performance.now(),dt=Math.min((n-l)/16,2);l=n;t+=.016*dt;requestAnimationFrame(lp);
+        cam.position.x=lerp(cam.position.x,tCamX,.05);cam.position.y=lerp(cam.position.y,tCamY,.05);cam.lookAt(0,0,0);
+        cursorLight.position.set(lerp(cursorLight.position.x, mWorld.x, 0.1), lerp(cursorLight.position.y, mWorld.y, 0.1), 2);
+        pGroup.rotation.y+=.0005;
+        if(pUni){pUni.uTime.value=t;pUni.uMouse.value.lerp(new THREE.Vector3(mWorld.x,mWorld.y,mWorld.z),.1)}
+        const ps=pPos.array,cnt=pPos.count;for(let i=0;i<cnt*3;i+=3){ps[i+1]+=pVel[i+1];if(ps[i+1]>15)ps[i+1]=-15}
+        pPos.needsUpdate=true;renderer.render(scene,cam);
+    }
+    lp();
+    window.addEventListener('resize',()=>{cam.aspect=window.innerWidth/window.innerHeight;cam.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+}
+
+// --- CURSOR & AMBIENT GLOW TRIGGER ---
+function initCursor(){
+    if(window.innerWidth<768)return;
+    const d=document.getElementById('cdot'),r=document.getElementById('cring'),body=document.body;
+    let tx=0,ty=0,rx=0,ry=0,h=false;
+    function tk(){
+        rx=lerp(rx,tx,.2);ry=lerp(ry,ty,.2);
+        d.style.left=tx+'px';d.style.top=ty+'px';r.style.left=rx+'px';r.style.top=ry+'px';
+        r.style.transform=h?'translate(-50%,-50%) scale(2)':'translate(-50%,-50%) scale(1)';
+        r.style.borderColor=h?'#fff':'var(--acc)';
+        requestAnimationFrame(tk);
+    }
+    document.addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY});
+    document.addEventListener('mouseover',e=>{
+        if(e.target.closest('button,a,.pill,.mcard,.sbox'))h=true;
+        // Feature 1: Ambient Background Glow Trigger
+        const card = e.target.closest('.mcard');
+        if(card){
+            const c = card.getAttribute('data-cat');
+            document.documentElement.style.setProperty('--ambient', GLOW_COLORS[c] || GLOW_COLORS['ALL']);
+        }
+    });
+    document.addEventListener('mouseout',e=>{
+        if(e.target.closest('button,a,.pill,.mcard,.sbox'))h=false;
+        if(e.target.closest('.mcard')) document.documentElement.style.setProperty('--ambient', 'transparent');
+    });
+    tk();
+}
+
+function initMagnetic(){
+    document.querySelectorAll('.mag-btn,.sbtn').forEach(b=>{
+        b.addEventListener('mousemove',e=>{
+            const r=b.getBoundingClientRect(),x=(e.clientX-r.left-r.width/2)*.3,y=(e.clientY-r.top-r.height/2)*.3;
+            b.style.transform=`translate(${x}px,${y}px)`;
+        });
+        b.addEventListener('mouseleave',()=>{b.style.transform=''});
+    });
+}
+
+function initLoader(){
+    const ld=document.getElementById('loader'),ll=document.getElementById('ll'),lb=document.getElementById('lb'),lp=document.getElementById('lp');
+    setTimeout(()=>{ll.style.opacity='1';ll.style.transform='translateY(0)'},100);
+    let p=0;const iv=setInterval(()=>{p+=Math.random()*15+5;if(p>=100){p=100;clearInterval(iv);setTimeout(()=>{ld.style.opacity='0';setTimeout(()=>{ld.style.display='none';showSite()},800)},300)}lb.style.width=p+'%';lp.textContent=Math.floor(p)+'%'},40);
+}
+
+function showSite(){
+    document.getElementById('nav').classList.add('vis');
+    setTimeout(()=>document.getElementById('hc').classList.add('vis'),200);
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.from('.stitem',{y:40,opacity:0,stagger:.1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:'.stats',start:'top 85%',once:true}});
+}
+
+// --- Feature 3: Kinetic Scroll Skewing ---
+function initLenis(){
+    if(typeof Lenis==='undefined')return;
+    lenis=new Lenis({duration:1.2,easing:(t)=>Math.min(1,1.001-Math.pow(2,-10*t))});
+    
+    // Skewing Logic tied to Velocity
+    let proxy = { skew: 0 };
+    let skewSetter = gsap.quickSetter(".mcard", "skewY", "deg");
+    
+    lenis.on('scroll', (e) => {
+        ScrollTrigger.update();
+        let v = e.velocity;
+        let skew = gsap.utils.clamp(-5, 5, v * -0.15); // Adjust sensitivity
+        if (Math.abs(skew) > Math.abs(proxy.skew)) {
+            proxy.skew = skew;
+            gsap.to(proxy, {skew: 0, duration: 0.8, ease: "elastic.out(1, 0.3)", overwrite: true, onUpdate: () => skewSetter(proxy.skew)});
+        }
+    });
+    
+    function r(t){lenis.raf(t);requestAnimationFrame(r)}
+    requestAnimationFrame(r);
+}
+
+function initFlip(){
+    const w=['ARCHIVE','CINEMA','CLASSIC','MASTERPIECE','THRILLER'];let i=0;const e=document.getElementById('fw');
+    setInterval(()=>{gsap.to(e,{y:-20,opacity:0,duration:.3,onComplete:()=>{i=(i+1)%w.length;e.textContent=w[i];gsap.fromTo(e,{y:20,opacity:0},{y:0,opacity:1,duration:.4,ease:'back.out(1.5)'})}})},2500);
+}
+
+function initPills(){
+    const c=document.getElementById('pills'),cs=['ALL','BOLLYWOOD','HOLLYWOOD','WEB SERIES','SOUTH','ANIME'];
+    cs.forEach(x=>{
+        const p=document.createElement('div');p.className='pill'+(x==='ALL'?' active':'');p.textContent=x;
+        p.addEventListener('click',()=>{document.querySelectorAll('.pill').forEach(y=>y.classList.remove('active'));p.classList.add('active');cat=x;doFilter()});
+        c.appendChild(p);
+    });
+}
+
+function initSearch(){
+    const i=document.getElementById('si');let t=null;
+    i.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{q=i.value.toLowerCase().trim();doFilter()},300)});
+    i.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+}
+function doSearch(){q=document.getElementById('si').value.toLowerCase().trim();doFilter()}
+
+// --- Feature 5: 3D "Blackhole" Transition ---
+function doFilter(){
+    SFX.shatter(); // Sound effect on filter
+    filtered=movies.filter(m=>{
+        const ms=!q||m.title.toLowerCase().includes(q)||(m.category||'').toLowerCase().includes(q)||(m.language||'').toLowerCase().includes(q);
+        return ms&&(cat==='ALL'||m.category===cat);
+    });
+    document.getElementById('cnt').textContent=`${filtered.length} RECORDS FOUND`;
+    document.getElementById('sec-title').textContent=cat;
+    
+    const oldCards = document.querySelectorAll('.mcard');
+    if(oldCards.length > 0){
+        // Animate Old Cards Out (Shatter to back)
+        gsap.to(oldCards, {z: -800, opacity: 0, rotationY: 45, stagger: 0.02, duration: 0.5, ease:'power2.in', onComplete: renderCards});
+    } else {
+        renderCards();
+    }
+}
+
+function renderSkels(){
+    const g=document.getElementById('grid');g.innerHTML='';
+    for(let i=0;i<10;i++){g.innerHTML+='<div class="skel"><div class="skel-p"></div><div class="skel-i"><div class="skel-t"></div><div class="skel-m"></div><div class="skel-b"></div></div></div>';}
+}
+
+async function fetchPoster(t){
+    const k=CONFIG.POSTER+t.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    try{const c=localStorage.getItem(k);if(c)return c==='NULL'?null:c}catch(e){}
+    if(CONFIG.TMDB==='REPLACE_TMDB_KEY')return null;
+    try{
+        const r=await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(t)}&api_key=${CONFIG.TMDB}&language=en-US`);
+        const j=await r.json();
+        if(j.results?.[0]?.poster_path){
+            const u=`https://image.tmdb.org/t/p/w500${j.results[0].poster_path}`;
+            try{localStorage.setItem(k,u)}catch(e){} return u;
+        }
+        try{localStorage.setItem(k,'NULL')}catch(e){}
+    }catch(e){} return null;
+}
+
+async function renderCards(){
+    const g=document.getElementById('grid');g.innerHTML='';
+    if(!filtered.length){
+        g.innerHTML='<div class="nores"><h2>NO SIGNAL</h2><button class="nores-btn" onclick="openChannel()">REQUEST IN MAINFRAME (BOT)</button></div>';
+        return;
+    }
+    const b=CONFIG.BOT==='REPLACE_BOT_USERNAME'?'cineundergroundbot':CONFIG.BOT;
+    
+    // Generic abstract video for Feature 6 (Video Previews)
+    const demoVid = "https://cdn.pixabay.com/video/2023/10/22/186008-876822268_tiny.mp4"; 
+
+    filtered.forEach((m,i)=>{
+        const c=document.createElement('div');c.className='mcard';
+        c.setAttribute('data-cat', m.category || 'ALL'); // For Glow
+        c.innerHTML=`
+            <div class="poster">
+                <div class="catbadge">${m.category||'UNKNOWN'}</div>
+                <video src="${demoVid}" muted loop playsinline></video>
+                <div class="govl"></div>
+                <div id="p${i}" style="width:100%;height:100%;position:relative;z-index:1"></div>
+            </div>
+            <div class="cinfo">
+                <div class="ctitle">${m.title}</div>
+                <div class="cmeta">${m.year||'----'} • ${m.language||'EN'}</div>
+                <button class="cbot" onclick="window.open('https://t.me/${b}?start='+encodeURIComponent('${m.deeplink_keyword}'),'_blank')">EXTRACT FILE</button>
+            </div>`;
+        g.appendChild(c);
+        
+        // Hover to play video
+        c.addEventListener('mouseenter', ()=>{ const v=c.querySelector('video'); if(v)v.play(); });
+        c.addEventListener('mouseleave', ()=>{ const v=c.querySelector('video'); if(v){v.pause();v.currentTime=0;} });
+    });
+    
+    // Animate New Cards In (Emerge from depth)
+    gsap.fromTo('.mcard', {z: 800, opacity: 0, rotationY: -45}, {z: 0, opacity: 1, rotationY: 0, stagger: 0.04, duration: 0.8, ease: "back.out(1.2)", clearProps: "all"});
+    
+    initTilt();initMagnetic();
+    document.querySelectorAll('.cbot').forEach(b=>b.addEventListener('click',SFX.click));
+
+    for(let i=0;i<filtered.length;i++){
+        const m=filtered[i],e=document.getElementById('p'+i);if(!e)continue;
+        const u=await fetchPoster(m.title);
+        if(u){
+            e.innerHTML=`<img src="${u}" alt="${m.title}">`;
+        }else{
+            const inits=m.title.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+            e.innerHTML=`<div class="fallback"><div class="fallback-initials">${inits}</div></div>`;
+        }
+    }
+}
+
+function initTilt(){
+    document.querySelectorAll('.mcard').forEach(c=>{
+        c.addEventListener('mousemove',e=>{
+            const r=c.getBoundingClientRect(),rx=(e.clientY-r.top-r.height/2)/(r.height/2)*-12,ry=(r.width/2-(e.clientX-r.left))/(r.width/2)*12;
+            c.style.transform=`perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02,1.02,1.02)`;
+        });
+        c.addEventListener('mouseleave',()=>{
+            c.style.transform='perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+        });
+    });
+}
+
+async function fetchData(){
+    renderSkels();let d=SAMPLE;
+    if(CONFIG.SHEET_ID&&CONFIG.SHEET_ID!=='REPLACE_SHEET_ID'){
+        try{
+            const r=await fetch(`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`);
+            if(r.ok){const c=await r.text(),p=Papa.parse(c,{header:true,skipEmptyLines:true}),dt=p.data.filter(x=>x.title);if(dt.length){d=dt;try{localStorage.setItem(CONFIG.CACHE,JSON.stringify(dt))}catch(e){}}}
+        }catch(e){try{const c=localStorage.getItem(CONFIG.CACHE);if(c)d=JSON.parse(c)}catch(e2){}}
+    }
+    movies=d;filtered=[...movies];document.getElementById('cnt').textContent=`${filtered.length} RECORDS FOUND`;renderCards();
+}
+
+function openChannel(){SFX.click();window.open(CONFIG.CHANNEL==='REPLACE_CHANNEL_LINK'?'https://t.me/':CONFIG.CHANNEL,'_blank')}
+
+function init(){
+    initThree();initCursor();initLenis();initLoader();initPills();initSearch();initFlip();initMagnetic();
+    document.querySelectorAll('.pill, .nlink, .mhl').forEach(e=>e.addEventListener('mouseenter',SFX.hover));
+    document.getElementById('nav').addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+    fetchData();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script></body></html>
