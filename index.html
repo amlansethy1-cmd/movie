@@ -1,556 +1,1152 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Cine Underground — Search movies & web series. Instant Telegram access.">
     <meta property="og:title" content="Cine Underground">
+    <meta property="og:description" content="Find & access movies instantly via Telegram">
     <meta name="theme-color" content="#070707">
     <title>CINE UNDERGROUND • Underground Cinema. No Limits.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
             --bg: #070707; --bg2: #0D0D0D; --card: #111111;
             --acc: #FF3D00; --acc2: #FF6B35;
-            --glow: rgba(255, 61, 0, 0.2); --glows: rgba(255, 61, 0, 0.4);
-            --gb: rgba(255, 255, 255, 0.07);
-            --t: #fff; --t2: #888; --t3: #444; --bdr: #1A1A1A;
-            --ambient: transparent;
+            --glow: rgba(255,61,0,0.2); --glows: rgba(255,61,0,0.4);
+            --glass: rgba(255,255,255,0.03); --gb: rgba(255,255,255,0.07);
+            --t: #FFFFFF; --t2: #888888; --t3: #444444; --bdr: #1A1A1A;
         }
+
         html { scroll-behavior: auto; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--t); font-family: 'Montserrat', sans-serif; overflow-x: hidden; line-height: 1.4; }
-        h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
-        
-        /* Ambient Glow */
-        #ambient-glow { position: fixed; inset: 0; background: radial-gradient(circle 600px at 50% 50%, var(--ambient), transparent 70%); opacity: 0.12; z-index: 0; pointer-events: none; transition: background 0.5s ease; }
-        
-        /* Cursor - Desktop Only */
+
+        body {
+            background: var(--bg); color: var(--t);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden; line-height: 1.4;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; line-height: 1; }
+
+        /* ── Custom Cursor (Desktop Only) ── */
         @media (min-width: 769px) { * { cursor: none !important; } }
-        #cdot { position: fixed; width: 8px; height: 8px; background: var(--acc); border-radius: 50%; pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); box-shadow: 0 0 16px var(--acc); will-change: left, top; }
-        #cring { position: fixed; width: 40px; height: 40px; border: 1.5px solid var(--acc); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: transform 0.15s ease, opacity 0.2s ease; box-shadow: 0 0 0 4px var(--glow); will-change: left, top; }
-        #cring.hover { transform: translate(-50%, -50%) scale(2); opacity: 0.5; }
+
+        #cdot {
+            position: fixed; width: 8px; height: 8px; background: var(--acc);
+            border-radius: 50%; pointer-events: none; z-index: 10000;
+            transform: translate(-50%,-50%);
+            box-shadow: 0 0 16px var(--acc), 0 0 32px rgba(255,61,0,0.4);
+            will-change: left,top; transition: transform 0.15s ease, opacity 0.2s ease;
+        }
+        #cring {
+            position: fixed; width: 40px; height: 40px; border: 1.5px solid var(--acc);
+            border-radius: 50%; pointer-events: none; z-index: 9999;
+            transform: translate(-50%,-50%);
+            transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, transform 0.15s cubic-bezier(0.23,1,0.32,1);
+            box-shadow: 0 0 0 4px var(--glow); will-change: left,top,transform;
+        }
+        #cdot.hover { transform: translate(-50%,-50%) scale(0); }
+        #cring.hover { transform: translate(-50%,-50%) scale(2.2); opacity: 0.4; }
         @media (max-width: 768px) { #cdot, #cring { display: none !important; } * { cursor: auto !important; } }
 
-        /* Canvas & Base Loader */
+        /* ── Three.js Canvas ── */
         canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-        #loader { position: fixed; inset: 0; z-index: 9500; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease; }
+
+        /* ── Loader ── */
+        #loader {
+            position: fixed; inset: 0; z-index: 9500; background: var(--bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
         #loader.hide { opacity: 0; visibility: hidden; }
-        .ll-logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 8vw, 54px); letter-spacing: 6px; color: #fff; margin-bottom: 6px; opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+        .ll-logo {
+            font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px,8vw,54px);
+            letter-spacing: 6px; color: #fff; margin-bottom: 6px;
+            opacity: 0; transform: translateY(22px); transition: all 0.7s ease;
+        }
         .ll-logo.vis { opacity: 1; transform: translateY(0); }
         .ll-logo span { color: var(--acc); }
-        .ll-sub { font-size: 10px; letter-spacing: 4px; color: var(--t3); margin-bottom: 40px; opacity: 0; transition: all 0.5s ease 0.2s; }
-        .ll-sub.vis { opacity: 1; }
+        .ll-sub {
+            font-size: 10px; letter-spacing: 4px; color: var(--t3); margin-bottom: 48px;
+            opacity: 0; transform: translateY(10px); transition: all 0.7s ease 0.25s;
+        }
+        .ll-sub.vis { opacity: 1; transform: translateY(0); }
         .ll-bar-wrap { width: 220px; height: 2px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
-        .ll-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--acc), var(--acc2)); border-radius: 2px; transition: width 0.1s linear; }
+        .ll-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--acc), var(--acc2)); border-radius: 2px; transition: width 0.05s linear; }
         .ll-pct { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--acc); margin-top: 18px; letter-spacing: 2px; }
 
-        /* Nav */
-        nav { position: fixed; top: 0; width: 100%; height: 72px; display: flex; align-items: center; padding: 0 5%; z-index: 1000; transition: all 0.4s ease; opacity: 0; transform: translateY(-20px); }
+        /* ── Navbar ── */
+        nav {
+            position: fixed; top: 0; width: 100%; height: 72px;
+            display: flex; align-items: center; padding: 0 48px;
+            z-index: 1000; transition: all 0.4s ease;
+            opacity: 0; transform: translateY(-20px);
+        }
         nav.vis { opacity: 1; transform: translateY(0); }
-        nav.scrolled { background: rgba(7,7,7,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--gb); }
+        nav.scrolled {
+            background: rgba(7,7,7,0.92); backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--gb);
+        }
         .nlogo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
-        .nlogo-text { font-family: 'Bebas Neue', sans-serif; font-size: clamp(18px, 4vw, 22px); letter-spacing: 3px; }
+        .nlogo svg { width: 28px; height: 28px; flex-shrink: 0; }
+        .nlogo-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
         .nlogo-text span { color: var(--acc); }
-        .nright { margin-left: auto; display: flex; align-items: center; gap: 28px; }
-        .nlink { font-size: 11px; font-weight: 500; letter-spacing: 2px; color: var(--t2); text-decoration: none; transition: color 0.2s; }
+        .nright { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .nlink { font-size: 11px; font-weight: 500; letter-spacing: 2px; color: var(--t2); text-decoration: none; transition: color 0.2s; position: relative; }
+        .nlink::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--acc); transition: width 0.3s ease; }
         .nlink:hover { color: var(--acc); }
-        .nbtn { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; padding: 10px 24px; border-radius: 6px; border: none; box-shadow: 0 4px 20px rgba(255,61,0,0.3); transition: transform 0.2s, box-shadow 0.2s; }
-        .nbtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,61,0,0.5); }
+        .nlink:hover::after { width: 100%; }
 
-        /* Hero */
-        .hero { min-height: 100vh; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 60px; overflow: hidden; }
-        .orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(90px); will-change: transform; opacity: 0.6; }
-        .o1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,61,0,0.15), transparent 70%); top: -10%; left: -10%; animation: f1 12s ease-in-out infinite; }
-        .o2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,107,53,0.1), transparent 70%); bottom: -10%; right: -10%; animation: f2 10s ease-in-out infinite; }
-        .grain { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E") repeat; opacity: 0.03; mix-blend-mode: overlay; }
-        
-        .hcontent { position: relative; z-index: 3; max-width: 920px; text-align: center; width: 100%; opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        /* Nav search icon - shows when scrolled */
+        .nsrch {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--bdr); background: transparent;
+            color: var(--t2); display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; opacity: 0; pointer-events: none;
+            transform: scale(0.7); flex-shrink: 0;
+        }
+        .nsrch svg { width: 15px; height: 15px; }
+        nav.scrolled .nsrch { opacity: 1; pointer-events: all; transform: scale(1); }
+        .nsrch:hover { border-color: var(--acc); color: var(--acc); background: rgba(255,61,0,0.08); }
+
+        .nbtn {
+            background: linear-gradient(135deg, var(--acc), var(--acc2));
+            color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+            letter-spacing: 1px; padding: 10px 26px; border-radius: 6px; border: none;
+            box-shadow: 0 4px 24px rgba(255,61,0,0.35);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+            position: relative; overflow: hidden; white-space: nowrap;
+        }
+        .nbtn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: translateX(-100%); transition: transform 0.5s ease;
+        }
+        .nbtn:hover::before { transform: translateX(100%); }
+        .nbtn:hover { box-shadow: 0 8px 32px rgba(255,61,0,0.55); transform: translateY(-2px); }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh; min-height: 100dvh; position: relative; z-index: 1;
+            display: flex; align-items: center; justify-content: center;
+            padding: 100px 20px 60px; overflow: hidden;
+        }
+        .grain {
+            position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E") repeat;
+            opacity: 0.04; animation: grain 0.5s steps(2) infinite; mix-blend-mode: overlay;
+        }
+        .hcontent {
+            position: relative; z-index: 3; max-width: 920px; text-align: center; width: 100%;
+            opacity: 0; transform: translateY(30px); transition: opacity 1s ease, transform 1s ease;
+        }
         .hcontent.vis { opacity: 1; transform: translateY(0); }
-        .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.3); color: var(--acc); font-size: 10px; font-weight: 600; letter-spacing: 3px; padding: 8px 20px; border-radius: 100px; margin-bottom: 28px; }
-        .headline { font-family: 'Bebas Neue', sans-serif; font-size: clamp(50px, 10vw, 130px); line-height: 0.9; letter-spacing: 1px; margin-bottom: 24px; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.35);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            color: var(--acc); font-size: 10px; font-weight: 600; letter-spacing: 3px;
+            padding: 8px 20px; border-radius: 100px; margin-bottom: 28px;
+        }
+        .headline {
+            font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px,10vw,130px);
+            line-height: 0.9; letter-spacing: 1px; margin-bottom: 28px;
+        }
         .flip-wrap { display: inline-block; perspective: 1000px; vertical-align: bottom; }
-        .flip-word { display: inline-block; color: var(--acc); will-change: transform; text-shadow: 0 0 20px rgba(255,61,0,0.6); }
-        .hsub { font-size: clamp(13px, 3vw, 15px); font-weight: 300; color: var(--t2); line-height: 1.8; max-width: 500px; margin: 0 auto 40px; }
-        
-        /* 🔥 NEON ANIMATED SEARCH BOX (Lightweight CSS Hack) */
-        .sbar { max-width: 640px; margin: 0 auto 30px; position: relative; padding: 0 16px; }
-        .sbox { position: relative; border-radius: 14px; padding: 2px; display: flex; align-items: center; overflow: hidden; z-index: 1; }
-        .sbox::before { content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; background: conic-gradient(transparent, transparent, transparent, var(--acc)); animation: spin 4s linear infinite; z-index: -2; opacity: 0.5; transition: opacity 0.3s; }
-        .sbox::after { content: ''; position: absolute; inset: 1px; background: rgba(10,10,10,0.9); border-radius: 13px; z-index: -1; }
-        .sbox:focus-within::before { opacity: 1; animation: spin 1.5s linear infinite; background: conic-gradient(transparent, transparent, var(--acc2), var(--acc)); }
+        .flip-word {
+            display: inline-block; color: var(--acc); will-change: transform;
+            text-shadow: 0 0 10px rgba(255,61,0,0.8), 0 0 25px rgba(255,61,0,0.4);
+        }
+        .hsub {
+            font-size: clamp(13px,2.5vw,15px); font-weight: 300; color: var(--t2);
+            line-height: 1.9; max-width: 480px; margin: 0 auto 42px;
+        }
+
+        /* ── Animated Search Box ── */
+        .sbar { max-width: 640px; margin: 0 auto 28px; position: relative; padding: 0 16px; }
+        .sbox {
+            background: rgba(10,10,10,0.8); border-radius: 14px; padding: 2px;
+            display: flex; align-items: center; position: relative; overflow: hidden; z-index: 1;
+        }
+        .sbox::before {
+            content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background: conic-gradient(transparent, transparent, transparent, var(--acc));
+            animation: spin 3s linear infinite; z-index: -2;
+        }
+        .sbox::after {
+            content: ''; position: absolute; inset: 1px;
+            background: rgba(15,15,15,0.95); border-radius: 13px; z-index: -1;
+            backdrop-filter: blur(24px);
+        }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        .sicon { position: relative; left: 16px; color: #666; width: 18px; height: 18px; z-index: 2; flex-shrink: 0; }
-        .sinput { flex: 1; background: transparent; border: none; outline: none; padding: 14px 14px 14px 24px; font-family: 'Montserrat', sans-serif; font-size: 15px; color: #fff; z-index: 2; width: 100%; }
-        .sbtn { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; padding: 12px 28px; border-radius: 9px; border: none; z-index: 2; margin-right: 4px; box-shadow: 0 4px 15px rgba(255,61,0,0.3); transition: transform 0.2s; }
-        .sbtn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,61,0,0.5); }
+        .sbox:focus-within::before { background: conic-gradient(transparent, transparent, var(--acc2), var(--acc)); animation: spin 1.5s linear infinite; }
+        .sicon, .sinput, .sbtn { position: relative; z-index: 2; }
+        .sicon { left: 20px; top: 50%; transform: translateY(-50%); color: #555; width: 18px; height: 18px; flex-shrink: 0; pointer-events: none; position: absolute; }
+        .sinput { flex: 1; background: transparent; border: none; outline: none; padding: 14px 14px 14px 45px; font-family: 'Montserrat', sans-serif; font-size: 15px; color: #fff; min-width: 0; }
+        .sinput::placeholder { color: #444; }
+        .sbtn {
+            background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff;
+            font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
+            padding: 11px 26px; border-radius: 9px; border: none;
+            box-shadow: 0 4px 20px rgba(255,61,0,0.4);
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            flex-shrink: 0; white-space: nowrap; margin-right: 4px;
+        }
+        .sbtn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,61,0,0.55); }
+        .sbtn:active { transform: scale(0.97); }
 
-        .pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 0 16px; }
-        .pill { border: 1px solid var(--bdr); border-radius: 100px; padding: 8px 20px; font-size: 11px; font-weight: 600; color: var(--t2); background: transparent; transition: all 0.2s ease; letter-spacing: 0.5px; white-space: nowrap; }
-        .pill.active { background: var(--acc); color: #fff; border-color: var(--acc); box-shadow: 0 4px 15px rgba(255,61,0,0.3); }
-        
-        .stats { background: var(--bg2); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); padding: 32px 20px; position: relative; z-index: 1; }
-        .stwrap { max-width: 900px; margin: 0 auto; display: flex; justify-content: center; gap: clamp(40px, 8vw, 80px); align-items: center; }
-        .stitem { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .stval { font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 5vw, 40px); color: #fff; line-height: 1; }
-        .stlbl { font-size: 9px; font-weight: 600; letter-spacing: 2px; color: var(--t2); }
-        .stdiv { width: 1px; height: 40px; background: var(--bdr); }
+        /* ── Category Pills ── */
+        .pills {
+            display: flex; gap: 10px; justify-content: center;
+            flex-wrap: wrap; padding: 0 16px;
+        }
+        .pill {
+            border: 1px solid var(--bdr); border-radius: 100px; padding: 8px 20px;
+            font-size: 11px; font-weight: 600; color: var(--t2); background: transparent;
+            transition: all 0.25s ease; letter-spacing: 0.5px; white-space: nowrap;
+        }
+        .pill.active { background: var(--acc); color: #fff; border-color: var(--acc); box-shadow: 0 4px 20px rgba(255,61,0,0.35); }
+        .pill:hover:not(.active) { border-color: rgba(255,61,0,0.45); color: #fff; transform: translateY(-2px); }
 
-        .msec { position: relative; z-index: 1; padding: 80px 5%; max-width: 1500px; margin: 0 auto; }
-        .mhdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 15px;}
+        /* ── Ticker (replaces Stats) ── */
+        .ticker-section {
+            background: var(--bg2); border-top: 1px solid var(--bdr);
+            border-bottom: 1px solid var(--bdr);
+            padding: 0; position: relative; z-index: 1; overflow: hidden;
+        }
+        .ticker-label {
+            position: absolute; left: 0; top: 0; bottom: 0; z-index: 5;
+            background: linear-gradient(90deg, var(--acc) 0%, var(--acc2) 100%);
+            display: flex; align-items: center; padding: 0 20px;
+            font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px;
+            color: #fff; white-space: nowrap; flex-shrink: 0;
+        }
+        .ticker-label::after {
+            content: ''; position: absolute; right: -16px; top: 0; bottom: 0;
+            width: 16px; background: linear-gradient(90deg, var(--acc2), transparent);
+        }
+        .ticker-fade-left {
+            position: absolute; left: 100px; top: 0; bottom: 0; width: 60px; z-index: 4;
+            background: linear-gradient(90deg, var(--bg2), transparent); pointer-events: none;
+        }
+        .ticker-fade-right {
+            position: absolute; right: 0; top: 0; bottom: 0; width: 80px; z-index: 4;
+            background: linear-gradient(270deg, var(--bg2), transparent); pointer-events: none;
+        }
+        .ticker-track { overflow: hidden; padding: 18px 0 18px 110px; }
+        .ticker-inner {
+            display: flex; gap: 0; width: max-content;
+            animation: tickerScroll 40s linear infinite;
+        }
+        .ticker-inner:hover { animation-play-state: paused; }
+        .ticker-item {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 0 28px; white-space: nowrap;
+        }
+        .ticker-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--t2); transition: color 0.2s; letter-spacing: 0.5px; }
+        .ticker-item:hover .ticker-title { color: var(--t); }
+        .ticker-cat {
+            font-size: 8px; font-weight: 700; letter-spacing: 1.5px; color: var(--acc);
+            background: rgba(255,61,0,0.1); border: 1px solid rgba(255,61,0,0.2);
+            padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+        }
+        .ticker-sep { color: var(--bdr); font-size: 12px; }
+        @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* ── Movies Section ── */
+        .msec { position: relative; z-index: 1; padding: 80px 24px; max-width: 1500px; margin: 0 auto; }
+        .mhdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 44px; gap: 20px; }
         .mhl { display: flex; flex-direction: column; }
         .mlbl { font-size: 10px; letter-spacing: 3px; color: var(--acc); font-weight: 700; margin-bottom: 4px; }
-        .mtitle { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 8vw, 60px); color: #fff; line-height: 1; }
-        .macc { width: 60px; height: 4px; background: linear-gradient(90deg, var(--acc), var(--acc2)); margin-top: 10px; border-radius: 2px; }
-        .mcnt { font-size: 12px; color: var(--t2); border: 1px solid var(--bdr); padding: 8px 18px; border-radius: 100px; }
-        
-        .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; perspective: 1200px; }
+        .mtitle { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px,8vw,60px); color: #fff; line-height: 1; }
+        .macc { width: 70px; height: 4px; background: linear-gradient(90deg, var(--acc), var(--acc2)); margin-top: 12px; border-radius: 2px; }
+        .mcnt { font-size: 12px; color: var(--t2); border: 1px solid var(--bdr); padding: 8px 18px; border-radius: 100px; white-space: nowrap; }
 
-        /* 🔥 HOLOGRAPHIC 3D CARDS (Safe for Mobile) */
-        .mcard { 
-            background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; 
-            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.3s; 
-            transform-style: preserve-3d; will-change: transform; opacity: 0; transform: translateY(30px);
-            position: relative; overflow: hidden;
+        /* ── Movie Grid ── */
+        .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
+        @media (min-width: 1400px) { .mgrid { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 600px) { .mgrid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+
+        /* ── HOLOGRAPHIC 3D CARDS ── */
+        .mcard {
+            border-radius: 12px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s;
+            transform-style: preserve-3d;
+            will-change: transform;
+            opacity: 0; transform: translateY(28px);
+            position: relative;
         }
         .mcard.vis { opacity: 1; transform: translateY(0); }
-        
+
+        /* Desktop: allow 3D pop-out */
         @media (min-width: 769px) {
             .mcard { overflow: visible; background: transparent; }
-            .mcard:hover { border-color: rgba(255,61,0,0.4); box-shadow: 0 30px 60px rgba(0,0,0,0.8); z-index: 10; }
-            .mcard:hover .poster img { transform: scale(1.05); filter: brightness(0.5); }
-            /* Hologram pop-out text */
-            .mcard:hover .cinfo { transform: translateZ(40px); background: rgba(10,10,10,0.9); border-color: var(--acc); }
-            .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 10px rgba(0,0,0,0.9); }
-            .mcard:hover .cbot { transform: translateZ(30px); box-shadow: 0 10px 20px rgba(255,61,0,0.4); }
+            .mcard:hover { z-index: 10; }
+        }
+        /* Mobile: clip cleanly */
+        @media (max-width: 768px) {
+            .mcard { overflow: hidden; background: var(--card); border: 1px solid var(--bdr); }
         }
 
-        .poster { aspect-ratio: 2/3; position: relative; overflow: hidden; background: #0a0a0a; border-radius: 12px 12px 0 0; }
-        .poster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s, filter 0.4s; }
-        
-        /* Video Background */
-        .poster video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s; z-index: 1; pointer-events: none; }
-        .mcard:hover .poster video { opacity: 0.8; }
-        
-        .catbadge { position: absolute; top: 10px; left: 10px; background: rgba(255,61,0,0.9); color: #fff; font-size: 8px; font-weight: 700; letter-spacing: 1px; padding: 4px 10px; border-radius: 4px; z-index: 3; }
-        .cinfo { padding: 14px; background: var(--card); border: 1px solid var(--bdr); border-top: none; border-radius: 0 0 12px 12px; transition: transform 0.4s, background 0.3s, border-color 0.3s; transform-style: preserve-3d; }
-        .ctitle { font-family: 'Bebas Neue', sans-serif; font-size: 18px; line-height: 1.1; letter-spacing: 0.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 5px; transition: transform 0.4s; }
-        .cmeta { font-size: 10px; color: var(--t2); margin-bottom: 12px; transition: transform 0.4s; }
-        .cbot { width: 100%; height: 38px; background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1px; border: none; border-radius: 6px; transition: transform 0.4s, box-shadow 0.3s; display: flex; align-items: center; justify-content: center; }
+        .poster {
+            aspect-ratio: 2/3; position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            border-radius: 12px 12px 0 0;
+            border: 1px solid var(--bdr); border-bottom: none;
+            transition: border-color 0.3s ease;
+        }
+        .poster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), filter 0.4s; }
+        .mcard:hover .poster { border-color: rgba(255,61,0,0.45); }
+        .mcard:hover .poster img { transform: scale(1.08); filter: brightness(0.5); }
 
+        .govl {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 55%);
+            opacity: 0; transition: opacity 0.3s ease; z-index: 2;
+        }
+        .mcard:hover .govl { opacity: 1; }
+
+        .catbadge {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(255,61,0,0.9); backdrop-filter: blur(8px);
+            color: #fff; font-size: 8px; font-weight: 700; letter-spacing: 1px;
+            padding: 4px 10px; border-radius: 4px; z-index: 3; text-transform: uppercase;
+        }
+
+        .fallback {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #111, #0a0a0a);
+        }
+        .fallback svg { width: 44px; height: 44px; opacity: 0.1; }
+        .fallback-initials { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #1e1e1e; margin-top: 8px; }
+
+        /* Card Info - below poster, pops forward on hover */
+        .cinfo {
+            padding: 16px; background: var(--card);
+            border: 1px solid var(--bdr); border-top: none;
+            border-radius: 0 0 12px 12px;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s, border-color 0.3s, background 0.3s;
+        }
+        .mcard:hover .cinfo {
+            transform: translateZ(32px);
+            border-color: rgba(255,61,0,0.4);
+            box-shadow: 0 28px 56px rgba(0,0,0,0.8), 0 0 0 0 transparent;
+            background: rgba(12,12,12,0.98);
+        }
+
+        .ctitle {
+            font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+            line-height: 1.15; letter-spacing: 0.5px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; margin-bottom: 5px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), text-shadow 0.3s;
+        }
+        .cmeta {
+            font-size: 10px; color: var(--t2); letter-spacing: 0.5px; margin-bottom: 12px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+        }
+        .cbot {
+            width: 100%; height: 38px;
+            background: linear-gradient(135deg, var(--acc), var(--acc2));
+            color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+            letter-spacing: 1px; border: none; border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(255,61,0,0.22);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s;
+        }
+
+        .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 12px rgba(0,0,0,0.9); }
+        .mcard:hover .cmeta  { transform: translateZ(10px); }
+        .mcard:hover .cbot   { transform: translateZ(28px); box-shadow: 0 12px 28px rgba(255,61,0,0.45); }
+        .cbot:active { transform: scale(0.97); }
+
+        /* ── Skeleton Cards ── */
         .skel { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; overflow: hidden; }
-        .skel-p { aspect-ratio: 2/3; background: linear-gradient(90deg, #111 25%, #181818 50%, #111 75%); background-size: 400% 100%; animation: shim 1.5s infinite; }
+        .skel-p { aspect-ratio: 2/3; background: linear-gradient(90deg, #111 25%, #181818 50%, #111 75%); background-size: 400% 100%; animation: shim 1.8s ease infinite; }
         .skel-i { padding: 14px; }
-        .skel-t { height: 15px; width: 70%; background: #222; border-radius: 3px; margin-bottom: 8px; }
-        
-        .nores { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
-        .nores h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 8vw, 64px); color: #222; }
-        
-        footer { background: #050505; border-top: 1px solid var(--bdr); padding: 60px 5% 30px; position: relative; z-index: 1; }
-        .fgrid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; }
-        .sico { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--bdr); display: flex; align-items: center; justify-content: center; color: var(--t2); text-decoration: none; transition: all 0.3s; }
-        .sico:hover { border-color: var(--acc); color: var(--acc); transform: translateY(-3px); }
-        .flink { display: block; padding: 6px 0; font-size: 12px; color: var(--t2); text-decoration: none; }
-        .fbot { max-width: 1200px; margin: 40px auto 0; padding-top: 20px; border-top: 1px solid var(--bdr); display: flex; justify-content: space-between; font-size: 10px; color: var(--t3); flex-wrap: wrap; gap: 10px; }
+        .skel-t { height: 15px; width: 72%; background: linear-gradient(90deg, #141414 25%, #1f1f1f 50%, #141414 75%); background-size: 400% 100%; animation: shim 1.8s ease infinite; border-radius: 3px; margin-bottom: 8px; }
+        .skel-m { height: 10px; width: 42%; background: linear-gradient(90deg, #141414 25%, #1f1f1f 50%, #141414 75%); background-size: 400% 100%; animation: shim 1.8s ease infinite; border-radius: 3px; margin-bottom: 12px; }
+        .skel-b { height: 38px; background: linear-gradient(90deg, #161616 25%, #222 50%, #161616 75%); background-size: 400% 100%; animation: shim 1.8s ease infinite; border-radius: 6px; }
 
-        @keyframes f1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(50px, -40px); } }
-        @keyframes f2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-30px, 40px); } }
+        /* ── No Results ── */
+        .nores { grid-column: 1/-1; text-align: center; padding: 80px 20px; }
+        .nores h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px,10vw,64px); color: #1a1a1a; margin-bottom: 12px; }
+        .nores p { color: #444; font-size: 14px; margin-bottom: 28px; }
+        .nores-btn {
+            background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; border: none;
+            padding: 14px 32px; border-radius: 8px; font-family: 'Bebas Neue', sans-serif;
+            font-size: 17px; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(255,61,0,0.35);
+            transition: all 0.25s ease;
+        }
+        .nores-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,61,0,0.5); }
+
+        /* ── Footer ── */
+        footer { background: #050505; border-top: 1px solid var(--bdr); padding: 72px 24px 36px; position: relative; z-index: 1; }
+        .fgrid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+        .ftagline { font-size: 13px; font-weight: 300; color: var(--t2); margin-top: 12px; line-height: 1.7; max-width: 200px; }
+        .sicons { display: flex; gap: 12px; margin-top: 24px; }
+        .sico {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--bdr);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease; color: var(--t2); text-decoration: none;
+        }
+        .sico:hover { border-color: var(--acc); background: rgba(255,61,0,0.1); color: var(--acc); transform: translateY(-2px); }
+        .sico svg { width: 16px; height: 16px; }
+        .flbl { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 3px; color: var(--t3); margin-bottom: 16px; }
+        .flink { display: block; padding: 9px 0; font-size: 12px; color: var(--t2); text-decoration: none; border-bottom: 1px solid var(--bdr); transition: all 0.2s ease; }
+        .flink:last-child { border-bottom: none; }
+        .flink:hover { color: var(--acc); padding-left: 10px; }
+        .fdis { font-size: 11px; color: #333; line-height: 1.9; font-style: italic; }
+        .fbot {
+            max-width: 1200px; margin: 52px auto 0; padding-top: 24px; border-top: 1px solid var(--bdr);
+            display: flex; justify-content: space-between; font-size: 10px; color: var(--t3);
+            letter-spacing: 1px; flex-wrap: wrap; gap: 12px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--acc), var(--acc2)); border-radius: 2px; }
+        * { scrollbar-width: thin; scrollbar-color: var(--acc) var(--bg); }
+
+        /* ── Keyframes ── */
+        @keyframes grain {
+            0%, 100% { transform: translate(0,0); }
+            25% { transform: translate(-1%,-1%); }
+            50% { transform: translate(1%,1%); }
+            75% { transform: translate(-1%,1%); }
+        }
         @keyframes shim { 0% { background-position: -400% 0; } 100% { background-position: 400% 0; } }
 
+        /* ── Mobile Responsive ── */
         @media (max-width: 768px) {
-            nav { padding: 0 20px; height: 64px; }
+            nav { padding: 0 16px; height: 64px; }
+            .nlogo-text { font-size: 16px; letter-spacing: 2px; }
+            .nright { gap: 10px; }
             .nlink { display: none; }
-            .hero { padding: 100px 16px 40px; }
-            .pills { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; }
+            .nbtn { padding: 8px 16px; font-size: 13px; }
+            .nsrch { opacity: 1 !important; pointer-events: all !important; transform: scale(1) !important; }
+            .hero { padding: 100px 16px 50px; min-height: auto; }
+            .badge { font-size: 8px; padding: 6px 14px; letter-spacing: 1.5px; }
+            .sbar { padding: 0 8px; }
+            .sinput { padding: 12px 12px 12px 44px; font-size: 14px; }
+            .sicon { left: 28px; }
+            .sbtn { padding: 12px 18px; font-size: 14px; }
+            .pills { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 8px 8px; scrollbar-width: none; -ms-overflow-style: none; }
             .pills::-webkit-scrollbar { display: none; }
-            .stwrap { flex-direction: column; gap: 20px; }
-            .stdiv { display: none; }
-            .msec { padding: 50px 16px; }
-            .mgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .msec { padding: 56px 16px; }
+            .mhdr { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .fgrid { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+            .ftagline { max-width: none; margin: 12px auto 0; }
+            .sicons { justify-content: center; }
+            .fbot { flex-direction: column; gap: 10px; align-items: center; text-align: center; }
+            .ticker-label { font-size: 11px; padding: 0 14px; }
+            .ticker-track { padding-left: 80px; }
+            .ticker-fade-left { left: 70px; }
+            .ticker-title { font-size: 16px; }
         }
     </style>
 </head>
 <body>
-    
-    <div id="ambient-glow"></div>
+
     <canvas id="bg"></canvas>
-    
-    <div id="cdot"></div><div id="cring"></div>
+    <div id="cdot"></div>
+    <div id="cring"></div>
 
     <div id="loader">
         <div class="ll-logo" id="ll">CINE <span>UNDERGROUND</span></div>
-        <div class="ll-sub" id="ls">ESTABLISHING SECURE CONNECTION...</div>
+        <div class="ll-sub" id="ls">UNDERGROUND CINEMA. NO LIMITS.</div>
         <div class="ll-bar-wrap"><div class="ll-bar" id="lb"></div></div>
         <div class="ll-pct" id="lp">0%</div>
     </div>
 
     <nav id="nav">
         <a href="#" class="nlogo">
-            <svg width="24" height="24" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="82" stroke="#fff" stroke-width="16"/><circle cx="100" cy="100" r="40" fill="#FF3D00"/></svg>
+            <svg viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="100" r="82" stroke="#fff" stroke-width="14"/>
+                <circle cx="100" cy="100" r="52" stroke="#fff" stroke-width="14"/>
+                <circle cx="100" cy="100" r="12" fill="#FF3D00"/>
+                <rect x="22" y="14" width="8" height="8" rx="2" fill="#fff"/>
+                <rect x="170" y="14" width="8" height="8" rx="2" fill="#fff"/>
+                <rect x="22" y="178" width="8" height="8" rx="2" fill="#fff"/>
+                <rect x="170" y="178" width="8" height="8" rx="2" fill="#fff"/>
+            </svg>
             <div class="nlogo-text">CINE <span>UNDERGROUND</span></div>
         </a>
         <div class="nright">
             <a href="#msec" class="nlink">MOVIES</a>
-            <button class="nbtn" onclick="openChannel()">JOIN CHANNEL</button>
+            <a href="#footer" class="nlink">ABOUT</a>
+            <!-- Search icon — always visible on mobile, fades in on scroll for desktop -->
+            <button class="nsrch" id="nsrch" title="Search">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+            <button class="nbtn" id="join-btn">JOIN CHANNEL</button>
         </div>
     </nav>
 
     <section class="hero" id="hero">
-        <div class="orb o1"></div><div class="orb o2"></div><div class="grain"></div>
+        <div class="grain"></div>
         <div class="hcontent" id="hc">
-            <div class="badge">🎬 PREMIUM DIRECTORY</div>
-            <div class="headline">FIND YOUR<br>NEXT <span class="flip-wrap"><span id="fw" class="flip-word">OBSESSION</span></span></div>
-            <p class="hsub">Search our collection of movies & web series. Direct Telegram access. No signup required.</p>
+            <!-- iii: Updated badge text -->
+            <div class="badge">🎬 MOVIES &amp; WEB SERIES — CONNECT TO CINE UNDERGROUND</div>
+
+            <!-- iv: Removed "HERE." line -->
+            <div class="headline">
+                FIND YOUR<br>
+                NEXT <span class="flip-wrap"><span id="fw" class="flip-word">OBSESSION</span></span>
+            </div>
+
+            <p class="hsub">
+                Search our ever-growing collection of movies &amp; web series.<br>
+                One click. Direct Telegram access. No signup required.
+            </p>
+
             <div class="sbar">
                 <div class="sbox" id="sbox">
-                    <svg class="sicon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="si" class="sinput" placeholder="Search the database..." autocomplete="off">
-                    <button class="sbtn" onclick="doSearch()">SEARCH</button>
+                    <svg class="sicon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="si" class="sinput" placeholder="Search titles, genres, languages..." autocomplete="off">
+                    <button class="sbtn" id="search-btn">SEARCH</button>
                 </div>
             </div>
             <div class="pills" id="pills"></div>
+            <!-- v: scroll-ind removed -->
         </div>
     </section>
 
-    <section class="stats">
-        <div class="stwrap">
-            <div class="stitem"><div class="stval">10K+</div><div class="stlbl">MOVIES</div></div><div class="stdiv"></div>
-            <div class="stitem"><div class="stval">FAST</div><div class="stlbl">ACCESS</div></div><div class="stdiv"></div>
-            <div class="stitem"><div class="stval">DAILY</div><div class="stlbl">UPDATES</div></div>
+    <!-- v: Stats replaced with movie ticker -->
+    <section class="ticker-section" id="ticker-section">
+        <div class="ticker-label">🔥 NOW IN</div>
+        <div class="ticker-fade-left"></div>
+        <div class="ticker-fade-right"></div>
+        <div class="ticker-track">
+            <div class="ticker-inner" id="ticker"></div>
         </div>
     </section>
 
     <section class="msec" id="msec">
         <div class="mhdr">
-            <div class="mhl"><div class="mlbl">BROWSE COLLECTION</div><div class="mtitle" id="sec-title">ALL MOVIES</div><div class="macc"></div></div>
+            <div class="mhl">
+                <div class="mlbl">BROWSE COLLECTION</div>
+                <div class="mtitle" id="sec-title">ALL MOVIES</div>
+                <div class="macc"></div>
+            </div>
             <div class="mcnt" id="cnt">Loading...</div>
         </div>
         <div class="mgrid" id="grid"></div>
     </section>
 
-    <footer>
+    <footer id="footer">
         <div class="fgrid">
             <div>
-                <div class="nlogo-text" style="font-size:20px; margin-bottom:10px;">CINE <span>UNDERGROUND</span></div>
-                <p class="ftagline">Underground Cinema. No Limits.</p>
+                <a href="#" class="nlogo">
+                    <svg width="32" height="32" viewBox="0 0 200 200" fill="none">
+                        <circle cx="100" cy="100" r="82" stroke="#fff" stroke-width="14"/>
+                        <circle cx="100" cy="100" r="52" stroke="#fff" stroke-width="14"/>
+                        <circle cx="100" cy="100" r="12" fill="#FF3D00"/>
+                    </svg>
+                    <div class="nlogo-text" style="font-size:24px">CINE <span>UNDERGROUND</span></div>
+                </a>
+                <p class="ftagline">Underground Cinema.<br>No Limits.</p>
                 <div class="sicons">
-                    <a href="#" class="sico" title="Telegram" onclick="openChannel()">TG</a>
-                    <a href="#" class="sico" title="Instagram">IG</a>
+                    <a href="#" id="tg-link" class="sico" title="Telegram" target="_blank">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.269c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.952z"/>
+                        </svg>
+                    </a>
+                    <a href="#" id="ig-link" class="sico" title="Instagram" target="_blank">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
-            <div><div class="flbl">EXPLORE</div><a href="#" class="flink">Telegram Channel</a><a href="#" class="flink">Request Movie</a></div>
-            <div><div class="flbl">LEGAL</div><p class="fdis">We index third-party channels. No files stored.</p></div>
+            <div>
+                <div class="flbl">EXPLORE</div>
+                <a href="#" class="flink" id="fl-channel">Telegram Channel</a>
+                <a href="#" class="flink" id="fl-insta">Instagram</a>
+                <a href="#" class="flink" id="fl-bot">Telegram Bot</a>
+                <a href="#" class="flink" id="fl-request">Request Movie</a>
+            </div>
+            <div>
+                <div class="flbl">LEGAL</div>
+                <p class="fdis">We do not host, store, or distribute any media files. All content is accessed via third-party Telegram channels. This site serves as a search directory only.</p>
+            </div>
         </div>
-        <div class="fbot"><div>© 2026 CINE UNDERGROUND</div><div>UNDERGROUND. NO LIMITS.</div></div>
+        <div class="fbot">
+            <div>© 2026 CINE UNDERGROUND</div>
+            <div>Made with ❤️ for Cinema Lovers</div>
+            <div>UNDERGROUND. NO LIMITS.</div>
+        </div>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
+
     <script>
-    // ═══ MASTER CONFIG ═══
-    const CONFIG = {
-        BOT: 'REPLACE_BOT_USERNAME', SHEET_ID: 'REPLACE_SHEET_ID', TMDB: 'REPLACE_TMDB_KEY', CHANNEL: 'REPLACE_CHANNEL_LINK', CACHE: 'cu_v3', POSTER: 'cu_p_', REFRESH: 300000
-    };
+    (function() {
+        'use strict';
 
-    const GLOW_COLORS = {"HOLLYWOOD":"#0055ff","BOLLYWOOD":"#ffaa00","WEB SERIES":"#9900ff","SOUTH":"#ff2a00","ANIME":"#ff0066","ALL":"#ffffff"};
+        // ═══ CONFIG ═══
+        const CONFIG = {
+            BOT: 'REPLACE_BOT_USERNAME',
+            SHEET_ID: 'REPLACE_SHEET_ID',
+            TMDB: 'REPLACE_TMDB_KEY',
+            CHANNEL: 'REPLACE_CHANNEL_LINK',
+            INSTAGRAM: 'REPLACE_INSTAGRAM_LINK',
+            CACHE: 'cu_data_v2',
+            POSTER: 'cu_p_',
+            REFRESH: 300000
+        };
 
-    const SAMPLE = [
-        {title:"Challengers",category:"HOLLYWOOD",year:"2024",language:"EN",deeplink_keyword:"challengers"},
-        {title:"Dune: Part Two",category:"HOLLYWOOD",year:"2024",language:"EN",deeplink_keyword:"dune-part-two"},
-        {title:"Jujutsu Kaisen",category:"ANIME",year:"2023",language:"JA",deeplink_keyword:"jjk"},
-        {title:"Baby Reindeer",category:"WEB SERIES",year:"2024",language:"EN",deeplink_keyword:"baby-reindeer"},
-        {title:"RRR",category:"SOUTH",year:"2022",language:"TE",deeplink_keyword:"rrr"},
-        {title:"Animal",category:"BOLLYWOOD",year:"2023",language:"HI",deeplink_keyword:"animal"}
-    ];
+        // ═══ SAMPLE DATA ═══
+        const SAMPLE = [
+            { title: "Challengers",               category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "challengers" },
+            { title: "Dune: Part Two",             category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "dune-part-two" },
+            { title: "Furiosa",                    category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "furiosa" },
+            { title: "Baby Reindeer",              category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "baby-reindeer" },
+            { title: "Shogun",                     category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "shogun" },
+            { title: "RRR",                        category: "SOUTH",       year: "2022", language: "TE", deeplink_keyword: "rrr" },
+            { title: "Oppenheimer",                category: "HOLLYWOOD",   year: "2023", language: "EN", deeplink_keyword: "oppenheimer" },
+            { title: "Pathaan",                    category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "pathaan" },
+            { title: "The Bear",                   category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "the-bear" },
+            { title: "Killers of the Flower Moon", category: "HOLLYWOOD",   year: "2023", language: "EN", deeplink_keyword: "killers-flower-moon" },
+            { title: "Animal",                     category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "animal" },
+            { title: "Mirzapur",                   category: "WEB SERIES",  year: "2023", language: "HI", deeplink_keyword: "mirzapur" },
+            { title: "Jawan",                      category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "jawan" },
+            { title: "Pushpa 2",                   category: "SOUTH",       year: "2024", language: "TE", deeplink_keyword: "pushpa2" },
+            { title: "Demon Slayer",               category: "ANIME",       year: "2024", language: "JP", deeplink_keyword: "demon-slayer" },
+            { title: "Attack on Titan",            category: "ANIME",       year: "2023", language: "JP", deeplink_keyword: "aot" },
+            { title: "KGF Chapter 2",              category: "DUBBED",      year: "2022", language: "HI", deeplink_keyword: "kgf2" },
+            { title: "Kalki 2898 AD",              category: "SOUTH",       year: "2024", language: "TE", deeplink_keyword: "kalki" }
+        ];
 
-    let movies=[], filtered=[], cat='ALL', q='';
-    const isMobile = window.innerWidth < 768;
+        // ═══ STATE ═══
+        let movies = [], filtered = [], cat = 'ALL', q = '';
+        let scene, cam, renderer, pGroup, pPos, pUni;
+        let tCamX = 0, tCamY = 5;
+        let mWorld = { x: 0, y: 0, z: 0 };
+        let lenis = null;
 
-    // ═══ BULLETPROOF THREE.JS (Mobile Safe) ═══
-    function initThree() {
-        try {
+        // ═══ UTILS ═══
+        function lerp(a, b, t) { return a * (1 - t) + b * t; }
+        function debounce(fn, delay) {
+            let timer;
+            return function(...args) { clearTimeout(timer); timer = setTimeout(() => fn.apply(this, args), delay); };
+        }
+
+        // ═══ SOUND EFFECTS ═══
+        const SFX = {
+            click: () => {
+                try {
+                    const c = new (window.AudioContext || window.webkitAudioContext)();
+                    const o = c.createOscillator(), g = c.createGain();
+                    o.connect(g); g.connect(c.destination);
+                    o.frequency.setValueAtTime(800, c.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(200, c.currentTime + 0.08);
+                    g.gain.setValueAtTime(0.1, c.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+                    o.start(); o.stop(c.currentTime + 0.1);
+                } catch(e) {}
+            },
+            hover: () => {
+                try {
+                    const c = new (window.AudioContext || window.webkitAudioContext)();
+                    const o = c.createOscillator(), g = c.createGain();
+                    o.type = 'sine'; o.connect(g); g.connect(c.destination);
+                    o.frequency.setValueAtTime(400, c.currentTime);
+                    g.gain.setValueAtTime(0.05, c.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05);
+                    o.start(); o.stop(c.currentTime + 0.05);
+                } catch(e) {}
+            }
+        };
+
+        // ═══ CYBER-WAVE 3D BACKGROUND ═══
+        function initThree() {
             const canvas = document.getElementById('bg');
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x070707);
-            const cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            cam.position.z = 8;
-            
-            // Added fail-safe for WebGL creation
-            const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !isMobile, alpha: true});
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            const isMob = window.innerWidth < 768;
 
-            const pGroup = new THREE.Group();
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x070707);
+
+            cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+            cam.position.set(0, 5, 12);
+            cam.lookAt(0, -2, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMob, alpha: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, isMob ? 1 : 2));
+
+            pGroup = new THREE.Group();
             scene.add(pGroup);
 
-            const pCount = isMobile ? 60 : 150; // Kept low for mobile
-            const pA = new Float32Array(pCount * 3), cA = new Float32Array(pCount * 3), pVel = new Float32Array(pCount * 3);
-            
-            for(let i=0; i<pCount*3; i+=3) {
-                pA[i] = (Math.random() - 0.5) * 30; pA[i+1] = (Math.random() - 0.5) * 30; pA[i+2] = (Math.random() - 0.5) * 30;
-                const b = 0.6 + Math.random() * 0.4;
-                cA[i] = b; cA[i+1] = b; cA[i+2] = b;
-                pVel[i+1] = 0.002 + Math.random() * 0.003;
+            const gridX = isMob ? 35 : 70;
+            const gridZ = isMob ? 35 : 70;
+            const pCount = gridX * gridZ;
+            const pA = new Float32Array(pCount * 3);
+            const cA = new Float32Array(pCount * 3);
+
+            let idx = 0;
+            for (let x = 0; x < gridX; x++) {
+                for (let z = 0; z < gridZ; z++) {
+                    pA[idx*3]   = (x - gridX/2) * 0.6;
+                    pA[idx*3+1] = 0;
+                    pA[idx*3+2] = (z - gridZ/2) * 0.6;
+                    const dC = Math.sqrt(Math.pow(x - gridX/2, 2) + Math.pow(z - gridZ/2, 2));
+                    const alpha = Math.max(0, 1.0 - dC / (gridX/2));
+                    cA[idx*3]   = 1.0 * alpha;
+                    cA[idx*3+1] = (0.2 + Math.random()*0.2) * alpha;
+                    cA[idx*3+2] = 0.0;
+                    idx++;
+                }
             }
 
-            const geo = new THREE.BufferGeometry();
-            geo.setAttribute('position', new THREE.BufferAttribute(pA, 3));
-            geo.setAttribute('color', new THREE.BufferAttribute(cA, 3));
+            pPos = new THREE.BufferAttribute(pA, 3);
+            const g = new THREE.BufferGeometry();
+            g.setAttribute('position', pPos);
+            g.setAttribute('color', new THREE.BufferAttribute(cA, 3));
 
-            const pUni = { uTime: { value: 0 }, uMouse: { value: new THREE.Vector3() } };
+            pUni = { uTime: { value: 0 }, uMouse: { value: new THREE.Vector2() } };
 
-            // FATAL CRASH FIX: Added "precision mediump float;" 
             const mat = new THREE.ShaderMaterial({
                 uniforms: pUni,
                 vertexShader: `
-                    precision mediump float;
-                    uniform float uTime; uniform vec3 uMouse; attribute vec3 color; varying vec3 vColor; varying float vD;
-                    void main(){
-                        vColor=color; vec3 pos=position; float dist=length(pos-uMouse);
-                        if(dist<10.0){ float intensity=(10.0-dist)/10.0; pos+=normalize(pos-uMouse)*intensity*sin(uTime*6.0)*2.5; }
-                        float n=sin(pos.x*2.3+uTime*3.2)*cos(pos.y*1.8+uTime*2.1)*sin(pos.z*1.4)*0.4;
-                        pos.y+=n*1.1; pos.x+=n*0.25*cos(uTime);
-                        vec4 mv=modelViewMatrix*vec4(pos,1.0);
-                        gl_PointSize=(2.5+sin(uTime*8.0+pos.x*3.0)*1.5)*(300.0/-mv.z);
-                        gl_Position=projectionMatrix*mv; vD=n;
-                    }`,
+                    uniform float uTime;
+                    uniform vec2 uMouse;
+                    attribute vec3 color;
+                    varying vec3 vColor;
+                    void main() {
+                        vColor = color;
+                        vec3 pos = position;
+                        float wave1 = sin(pos.x * 0.5 + uTime) * cos(pos.z * 0.4 + uTime * 0.8);
+                        float wave2 = sin(pos.x * 0.2 - uTime * 0.5) * 1.5;
+                        pos.y = wave1 + wave2 - 4.0;
+                        float dist = length(pos.xz - uMouse);
+                        if (dist < 4.0) { pos.y += (4.0 - dist) * 1.2 * sin(uTime * 6.0); }
+                        vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+                        /* Smaller dot size */
+                        float sz = clamp(1.2 + pos.y * 0.15, 0.4, 2.5);
+                        gl_PointSize = sz * (70.0 / -mv.z);
+                        gl_Position = projectionMatrix * mv;
+                    }
+                `,
                 fragmentShader: `
-                    precision mediump float;
-                    varying vec3 vColor; varying float vD; uniform float uTime;
-                    void main(){
-                        vec2 uv=gl_PointCoord-vec2(0.5); float d=length(uv); if(d>0.5)discard;
-                        float a=1.0-smoothstep(0.15,0.5,d);
-                        float tw=0.75+0.35*sin(uTime*12.0+gl_FragCoord.x*0.8);
-                        vec3 fc=vColor*(1.0+vD*0.7)*tw;
-                        fc.r+=smoothstep(0.35,0.5,d)*0.12*sin(uTime*4.0);
-                        gl_FragColor=vec4(fc,a*0.9);
-                    }`,
-                transparent: true, depthTest: false, blending: THREE.AdditiveBlending, vertexColors: true
+                    varying vec3 vColor;
+                    void main() {
+                        vec2 uv = gl_PointCoord - vec2(0.5);
+                        if(length(uv) > 0.5) discard;
+                        gl_FragColor = vec4(vColor, 0.8);
+                    }
+                `,
+                transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+            });
+            pGroup.add(new THREE.Points(g, mat));
+
+            window.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth) * 2 - 1;
+                const y = -(e.clientY / window.innerHeight) * 2 + 1;
+                mWorld = { x: x * 20, z: -y * 20 };
+                tCamX = x * 2; tCamY = 5 + y * 2;
             });
 
-            pGroup.add(new THREE.Points(geo, mat));
-
-            let tCamX = 0, tCamY = 0, mWorld = {x:0, y:0, z:0};
-            if(!isMobile) {
-                window.addEventListener('mousemove', e => {
-                    const x = (e.clientX/window.innerWidth)*2-1, y = -(e.clientY/window.innerHeight)*2+1;
-                    tCamX = x*0.6; tCamY = y*0.4; mWorld = {x: x*12, y: y*10, z: -3};
-                });
-            }
-
-            let t = 0, last = performance.now();
+            let t = 0, lastTime = performance.now();
             function animate() {
-                const now = performance.now(); t += 0.016 * Math.min((now - last)/16, 2); last = now;
+                const now = performance.now();
+                const dt = Math.min((now - lastTime) / 16, 2);
+                lastTime = now; t += 0.016 * dt;
                 requestAnimationFrame(animate);
-                cam.position.x += (tCamX - cam.position.x) * 0.08;
-                cam.position.y += (tCamY - cam.position.y) * 0.08;
-                cam.lookAt(0,0,0); pGroup.rotation.y += 0.00025;
-                pUni.uTime.value = t; pUni.uMouse.value.lerp(new THREE.Vector3(mWorld.x, mWorld.y, mWorld.z), 0.1);
-                
-                const ps = geo.attributes.position.array;
-                for(let i=0; i<pCount*3; i+=3) { ps[i+1] += pVel[i+1]; if(ps[i+1]>18) ps[i+1]=-18; }
-                geo.attributes.position.needsUpdate = true;
+                cam.position.x = lerp(cam.position.x, tCamX, 0.05);
+                cam.position.y = lerp(cam.position.y, tCamY, 0.05);
+                cam.lookAt(0, -2, 0);
+                pGroup.rotation.y = Math.sin(t*0.2) * 0.1;
+                if (pUni) {
+                    pUni.uTime.value = t;
+                    pUni.uMouse.value.lerp(new THREE.Vector2(mWorld.x, mWorld.z), 0.1);
+                }
                 renderer.render(scene, cam);
             }
             animate();
-            
-            window.addEventListener('resize', () => { cam.aspect = window.innerWidth/window.innerHeight; cam.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-        } catch (error) {
-            console.warn("WebGL initialization failed. Running fallback.");
-            document.getElementById('bg').style.background = "radial-gradient(circle at 50% 50%, #1a0a00, #070707)";
-        }
-    }
 
-    // ═══ ISOLATED LOADER ═══
-    function initLoader() {
-        const ld = document.getElementById('loader'), ll = document.getElementById('ll'), ls = document.getElementById('ls'), lb = document.getElementById('lb'), lp = document.getElementById('lp');
-        setTimeout(() => ll.classList.add('vis'), 100); setTimeout(() => ls.classList.add('vis'), 200);
-        let p = 0;
-        const iv = setInterval(() => {
-            p += Math.random() * 15 + 5;
-            if(p > 95) p = 95; // Hold at 95% until ready
-            lb.style.width = p + '%'; lp.textContent = Math.floor(p) + '%';
-        }, 60);
-
-        // Expose a globally callable finish function
-        window.finishLoader = function() {
-            clearInterval(iv);
-            lb.style.width = '100%'; lp.textContent = '100%';
-            setTimeout(() => {
-                ld.classList.add('hide');
-                setTimeout(() => { ld.style.display = 'none'; showSite(); }, 600);
-            }, 300);
-        }
-    }
-
-    // ═══ UI & LOGIC ═══
-    function initCursor() {
-        if(isMobile) return;
-        const d = document.getElementById('cdot'), r = document.getElementById('cring');
-        let tx=0, ty=0, rx=0, ry=0, h=false;
-        function tk() {
-            rx += (tx - rx) * 0.18; ry += (ty - ry) * 0.18;
-            d.style.transform = `translate(calc(${tx}px - 50%), calc(${ty}px - 50%)) scale(${h?0:1})`;
-            r.style.transform = `translate(calc(${rx}px - 50%), calc(${ry}px - 50%)) scale(${h?2.2:1})`;
-            r.style.borderColor = h ? '#fff' : 'var(--acc)';
-            requestAnimationFrame(tk);
-        }
-        document.addEventListener('mousemove', e => { tx=e.clientX; ty=e.clientY; });
-        document.addEventListener('mouseover', e => {
-            if(e.target.closest('button, a, .pill, .mcard')) h = true;
-            const card = e.target.closest('.mcard');
-            if(card) document.documentElement.style.setProperty('--ambient', GLOW_COLORS[card.getAttribute('data-cat')]||'transparent');
-        });
-        document.addEventListener('mouseout', e => {
-            if(e.target.closest('button, a, .pill, .mcard')) h = false;
-            if(e.target.closest('.mcard')) document.documentElement.style.setProperty('--ambient', 'transparent');
-        });
-        tk();
-    }
-
-    function initFlip() {
-        const w=['OBSESSION','THRILLER','CLASSIC','MASTERPIECE','HIDDEN GEM']; let i=0; const e=document.getElementById('fw');
-        setInterval(()=>{
-            if(typeof gsap!=='undefined'){
-                gsap.to(e,{rotationX:90,opacity:0,duration:0.35,ease:'power2.in',onComplete:()=>{
-                    i=(i+1)%w.length; e.textContent=w[i];
-                    gsap.fromTo(e,{rotationX:-90,opacity:0},{rotationX:0,opacity:1,duration:0.45,ease:'power3.out'});
-                }});
-            } else { e.textContent=w[(i=(i+1)%w.length)]; }
-        },2500);
-    }
-
-    function initPills() {
-        const c=document.getElementById('pills'), cs=['ALL','BOLLYWOOD','HOLLYWOOD','WEB SERIES','SOUTH','ANIME'];
-        cs.forEach(x => {
-            const p = document.createElement('div'); p.className = 'pill' + (x==='ALL'?' active':''); p.textContent = x;
-            p.addEventListener('click', () => {
-                document.querySelectorAll('.pill').forEach(y=>y.classList.remove('active')); p.classList.add('active'); cat = x; doFilter();
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    cam.aspect = window.innerWidth / window.innerHeight;
+                    cam.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                }, 150);
             });
-            c.appendChild(p);
-        });
-    }
+        }
 
-    function doSearch() { q = document.getElementById('si').value.toLowerCase().trim(); doFilter(); }
-    
-    function doFilter() {
-        filtered = movies.filter(m => {
-            const ms = !q || m.title.toLowerCase().includes(q) || (m.category||'').toLowerCase().includes(q);
-            const mc = cat === 'ALL' || m.category === cat; return ms && mc;
-        });
-        document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
-        
-        // FEATURE 3: GSAP Shatter Transition
-        if(typeof gsap !== 'undefined' && document.querySelectorAll('.mcard').length > 0) {
-            gsap.to('.mcard', { y: 30, opacity: 0, duration: 0.3, stagger: 0.02, onComplete: renderCards });
-        } else {
+        // ═══ CUSTOM CURSOR ═══
+        function initCursor() {
+            if (window.innerWidth < 769) return;
+            const dot = document.getElementById('cdot'), ring = document.getElementById('cring');
+            let tx = 0, ty = 0, rx = 0, ry = 0;
+            function track() {
+                rx = lerp(rx, tx, 0.16); ry = lerp(ry, ty, 0.16);
+                dot.style.left = tx + 'px'; dot.style.top = ty + 'px';
+                ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+                requestAnimationFrame(track);
+            }
+            document.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; });
+            document.addEventListener('mouseover', (e) => {
+                if (e.target.closest('button, a, .pill, .mcard')) { dot.classList.add('hover'); ring.classList.add('hover'); }
+            });
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.closest('button, a, .pill, .mcard')) { dot.classList.remove('hover'); ring.classList.remove('hover'); }
+            });
+            track();
+        }
+
+        // ═══ MAGNETIC BUTTONS ═══
+        function initMagnetic() {
+            if (window.innerWidth < 769) return;
+            document.querySelectorAll('.nbtn, .sbtn').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - rect.width/2) * 0.25;
+                    const y = (e.clientY - rect.top  - rect.height/2) * 0.25;
+                    btn.style.transform = `translate(${x}px,${y}px)`;
+                });
+                btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+            });
+        }
+
+        // ═══ LOADER ═══
+        function initLoader() {
+            const ll = document.getElementById('ll'), ls = document.getElementById('ls');
+            const lb = document.getElementById('lb'), lp = document.getElementById('lp');
+            const loader = document.getElementById('loader');
+            setTimeout(() => ll.classList.add('vis'), 100);
+            setTimeout(() => ls.classList.add('vis'), 280);
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 8;
+                if (progress >= 100) {
+                    progress = 100; clearInterval(interval);
+                    setTimeout(() => {
+                        loader.classList.add('hide');
+                        setTimeout(showSite, 600);
+                    }, 350);
+                }
+                lb.style.width = progress + '%';
+                lp.textContent = Math.floor(progress) + '%';
+            }, 50);
+        }
+
+        // ═══ SHOW SITE ═══
+        function showSite() {
+            document.getElementById('nav').classList.add('vis');
+            setTimeout(() => document.getElementById('hc').classList.add('vis'), 200);
+            if (typeof gsap !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.from('.mhl', { x: -40, opacity: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '#msec', start: 'top 75%', once: true } });
+                gsap.from('.fgrid > div', { y: 40, opacity: 0, stagger: 0.2, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: 'footer', start: 'top 85%', once: true } });
+            }
+        }
+
+        // ═══ LENIS SMOOTH SCROLL ═══
+        function initLenis() {
+            if (typeof Lenis === 'undefined') return;
+            lenis = new Lenis({ duration: 1.3, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10*t)), touchMultiplier: 2 });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+        }
+
+        // ═══ FLIP WORDS ═══
+        function initFlip() {
+            const words = ['OBSESSION', 'THRILLER', 'CLASSIC', 'MASTERPIECE', 'HIDDEN GEM'];
+            let i = 0; const el = document.getElementById('fw');
+            setInterval(() => {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(el, {
+                        rotationX: 90, opacity: 0, duration: 0.35, ease: 'power2.in',
+                        onComplete: () => {
+                            i = (i+1) % words.length; el.textContent = words[i];
+                            gsap.fromTo(el, { rotationX: -90, opacity: 0 }, { rotationX: 0, opacity: 1, duration: 0.45, ease: 'power3.out' });
+                        }
+                    });
+                } else {
+                    el.style.opacity = '0';
+                    setTimeout(() => { i = (i+1) % words.length; el.textContent = words[i]; el.style.opacity = '1'; }, 350);
+                }
+            }, 2500);
+        }
+
+        // ═══ NAVBAR ═══
+        function initNav() {
+            const nav = document.getElementById('nav');
+            window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', scrollY > 50); }, { passive: true });
+
+            // vi: Nav search icon → scroll to hero search and focus
+            document.getElementById('nsrch').addEventListener('click', () => {
+                SFX.click();
+                const input = document.getElementById('si');
+                const heroSection = document.getElementById('hero');
+                heroSection.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => { input.focus(); }, 600);
+            });
+        }
+
+        // ═══ PILLS ═══
+        function initPills() {
+            const container = document.getElementById('pills');
+            const categories = ['ALL', 'BOLLYWOOD', 'HOLLYWOOD', 'WEB SERIES', 'SOUTH', 'DUBBED', 'ANIME'];
+            categories.forEach(x => {
+                const pill = document.createElement('div');
+                pill.className = 'pill' + (x === 'ALL' ? ' active' : '');
+                pill.textContent = x;
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    cat = x; doFilter(); SFX.click();
+                });
+                container.appendChild(pill);
+            });
+        }
+
+        // ═══ SEARCH ═══
+        function initSearch() {
+            const input = document.getElementById('si');
+            const searchBtn = document.getElementById('search-btn');
+            input.addEventListener('input', debounce(() => { q = input.value.toLowerCase().trim(); doFilter(); }, 220));
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+            // i: Search button → filter + scroll to movies section
+            searchBtn.addEventListener('click', () => { doSearch(); SFX.click(); });
+        }
+
+        function doSearch() {
+            q = document.getElementById('si').value.toLowerCase().trim();
+            doFilter();
+            // i: Always scroll to movies section on search
+            setTimeout(() => {
+                document.getElementById('msec').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function doFilter() {
+            filtered = movies.filter(m => {
+                const matchSearch = !q ||
+                    m.title.toLowerCase().includes(q) ||
+                    (m.category || '').toLowerCase().includes(q) ||
+                    (m.language || '').toLowerCase().includes(q);
+                const matchCat = cat === 'ALL' || m.category === cat;
+                return matchSearch && matchCat;
+            });
+            document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
             renderCards();
         }
-    }
 
-    async function renderCards() {
-        const g = document.getElementById('grid'); g.innerHTML = '';
-        if(!filtered.length) { g.innerHTML='<div class="nores"><h2>NO RESULTS</h2><button class="nores-btn" onclick="openChannel()">REQUEST MOVIE</button></div>'; return; }
-        
-        const bot = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
-        const demoVid = "https://cdn.pixabay.com/video/2023/10/22/186008-876822268_tiny.mp4"; 
+        // ═══ TICKER (v: replaces stats) ═══
+        function updateTicker(data) {
+            const ticker = document.getElementById('ticker');
+            if (!ticker || !data.length) return;
 
-        filtered.forEach((m, i) => {
-            const c = document.createElement('div'); c.className = 'mcard'; c.setAttribute('data-cat', m.category || 'ALL');
-            c.innerHTML = `
-                <div class="poster">
-                    <div class="catbadge">${m.category||''}</div>
-                    <video src="${demoVid}" muted loop playsinline></video>
-                    <div class="govl"></div><div id="p${i}" style="width:100%;height:100%"></div>
+            const items = data.map(m => `
+                <div class="ticker-item">
+                    <span class="ticker-cat">${m.category || ''}</span>
+                    <span class="ticker-title">${m.title}</span>
+                    <span class="ticker-sep">◆</span>
                 </div>
-                <div class="cinfo">
-                    <div class="ctitle">${m.title}</div>
-                    <div class="cmeta">${m.year||''} • ${m.language||'EN'}</div>
-                    <button class="cbot" onclick="window.open('https://t.me/${bot}?start=${encodeURIComponent(m.deeplink_keyword)}','_blank')">GET MOVIE</button>
-                </div>`;
-            g.appendChild(c);
-            
-            if(!isMobile) {
-                c.addEventListener('mouseenter', ()=>{ const v=c.querySelector('video'); if(v)v.play(); });
-                c.addEventListener('mouseleave', ()=>{ const v=c.querySelector('video'); if(v){v.pause();v.currentTime=0;} });
-                
-                // Holographic Tilt Setup
-                const poster = c.querySelector('.poster img, .fallback');
-                c.addEventListener('mousemove', e => {
-                    const r = c.getBoundingClientRect();
-                    const rx = (e.clientY - r.top - r.height/2)/(r.height/2) * -10;
-                    const ry = (r.width/2 - (e.clientX - r.left))/(r.width/2) * 10;
-                    c.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-5px)`;
-                });
-                c.addEventListener('mouseleave', () => {
-                    c.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
-                });
-            }
-            setTimeout(() => c.classList.add('vis'), i * 40);
-        });
+            `).join('');
 
-        // Load Posters Async
-        for(let i=0; i<filtered.length; i++) {
-            const m = filtered[i], e = document.getElementById('p'+i); if(!e) continue;
-            let url = null;
-            if(CONFIG.TMDB !== 'REPLACE_TMDB_KEY') {
-                try {
-                    const res = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(m.title)}&api_key=${CONFIG.TMDB}`);
-                    const json = await res.json(); if(json.results?.[0]?.poster_path) url = `https://image.tmdb.org/t/p/w500${json.results[0].poster_path}`;
-                } catch(e) {}
-            }
-            if(url) e.innerHTML = `<img src="${url}" alt="${m.title}" loading="lazy">`;
-            else e.innerHTML = `<div class="fallback"><div class="fallback-initials">${m.title.substring(0,2).toUpperCase()}</div></div>`;
+            // Duplicate for seamless infinite scroll
+            ticker.innerHTML = items + items;
+
+            // Adjust speed: longer = faster scroll
+            const duration = Math.max(25, data.length * 2.5);
+            ticker.style.animationDuration = duration + 's';
         }
-    }
 
-    async function fetchData() {
-        let d = SAMPLE;
-        if(CONFIG.SHEET_ID && CONFIG.SHEET_ID !== 'REPLACE_SHEET_ID') {
+        // ═══ SKELETON CARDS ═══
+        function renderSkels() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const skel = document.createElement('div');
+                skel.className = 'skel';
+                skel.innerHTML = `<div class="skel-p"></div><div class="skel-i"><div class="skel-t"></div><div class="skel-m"></div><div class="skel-b"></div></div>`;
+                grid.appendChild(skel);
+            }
+        }
+
+        // ═══ FETCH POSTER ═══
+        async function fetchPoster(title) {
+            const key = CONFIG.POSTER + title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+            try { const cached = localStorage.getItem(key); if (cached) return cached === 'NULL' ? null : cached; } catch(e) {}
+            if (CONFIG.TMDB === 'REPLACE_TMDB_KEY') return null;
+            await new Promise(r => setTimeout(r, 80));
             try {
-                const r = await fetch(`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`);
-                if(r.ok) { const txt = await r.text(), parsed = Papa.parse(txt, {header:true, skipEmptyLines:true}); if(parsed.data.length) d = parsed.data; }
+                const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${CONFIG.TMDB}&language=en-US`, { signal: AbortSignal.timeout(5000) });
+                const json = await response.json();
+                if (json.results?.[0]?.poster_path) {
+                    const url = `https://image.tmdb.org/t/p/w500${json.results[0].poster_path}`;
+                    try { localStorage.setItem(key, url); } catch(e) {}
+                    return url;
+                }
+                try { localStorage.setItem(key, 'NULL'); } catch(e) {}
             } catch(e) {}
+            return null;
         }
-        movies = d; filtered = [...movies];
-        document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
-        renderCards();
-        if(window.finishLoader) window.finishLoader(); // Kill loader only after data is ready
-    }
 
-    function showSite() {
-        document.getElementById('nav').classList.add('vis');
-        setTimeout(() => document.getElementById('hc').classList.add('vis'), 200);
-        if(typeof gsap !== 'undefined') {
-            gsap.from('.stitem', { y: 30, opacity: 0, stagger: 0.15, duration: 1, scrollTrigger: { trigger: '.stats', start: 'top 80%' } });
-            gsap.from('.mhl', { x: -40, opacity: 0, duration: 1, scrollTrigger: { trigger: '#msec', start: 'top 80%' } });
+        // ═══ RENDER CARDS ═══
+        async function renderCards() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            if (!filtered.length) {
+                const noRes = document.createElement('div');
+                noRes.className = 'nores';
+                noRes.innerHTML = `<h2>NO RESULTS</h2><p>Try different keywords or request on bot</p><button class="nores-btn" onclick="window.open('${getChannelUrl()}','_blank')">REQUEST ON BOT</button>`;
+                grid.appendChild(noRes); return;
+            }
+
+            const botUsername = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
+
+            filtered.forEach((m, i) => {
+                const card = document.createElement('div');
+                card.className = 'mcard';
+                card.innerHTML = `
+                    <div class="poster">
+                        <div class="catbadge">${m.category || ''}</div>
+                        <div class="govl"></div>
+                        <div id="p${i}" style="width:100%;height:100%"></div>
+                    </div>
+                    <div class="cinfo">
+                        <div class="ctitle">${m.title}</div>
+                        <div class="cmeta">${m.year || ''} • ${m.language || ''}</div>
+                        <!-- ii: Button text changed to GET LINK -->
+                        <button class="cbot" data-link="https://t.me/${botUsername}?start=${encodeURIComponent(m.deeplink_keyword)}">🔗 GET LINK</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+                setTimeout(() => card.classList.add('vis'), i * 50);
+            });
+
+            document.querySelectorAll('.cbot').forEach(btn => {
+                btn.addEventListener('click', () => { window.open(btn.dataset.link, '_blank'); SFX.click(); });
+            });
+
+            initTilt(); initMagnetic(); initCardSounds();
+
+            for (let i = 0; i < filtered.length; i++) {
+                const m = filtered[i]; const el = document.getElementById('p' + i); if (!el) continue;
+                const url = await fetchPoster(m.title);
+                if (url) {
+                    const img = document.createElement('img');
+                    img.src = url; img.alt = m.title; img.loading = 'lazy';
+                    el.appendChild(img);
+                } else {
+                    const initials = m.title.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+                    el.innerHTML = `<div class="fallback"><svg viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="82" stroke="#fff" stroke-width="18"/><circle cx="100" cy="100" r="52" stroke="#fff" stroke-width="18"/><circle cx="100" cy="100" r="12" fill="#fff"/></svg><div class="fallback-initials">${initials}</div></div>`;
+                }
+            }
         }
-    }
 
-    function openChannel() { window.open(CONFIG.CHANNEL === 'REPLACE_CHANNEL_LINK' ? 'https://t.me/' : CONFIG.CHANNEL, '_blank'); }
-
-    // Start everything!
-    initLoader(); // Starts immediately to prevent blank screens
-    document.addEventListener('DOMContentLoaded', () => {
-        initThree();
-        initCursor();
-        initFlip();
-        initPills();
-        document.getElementById('si').addEventListener('input', () => { clearTimeout(window.sT); window.sT = setTimeout(doSearch, 300); });
-        
-        // Safe Lenis Init
-        if(typeof Lenis !== 'undefined' && !isMobile) {
-            const lenis = new Lenis({ duration: 1.2, smoothTouch: false });
-            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); } requestAnimationFrame(raf);
+        // ═══ HOLOGRAPHIC CARD TILT (Desktop) ═══
+        function initTilt() {
+            if (window.innerWidth < 769) return;
+            document.querySelectorAll('.mcard').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const rx = (e.clientY - rect.top  - rect.height/2) / (rect.height/2) * -12;
+                    const ry = (rect.width/2 - (e.clientX - rect.left)) / (rect.width/2) * 12;
+                    card.style.transition = 'border-color 0.3s, box-shadow 0.4s';
+                    card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-8px)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transition = 'transform 0.4s cubic-bezier(0.23,1,0.32,1), border-color 0.3s, box-shadow 0.4s';
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                });
+            });
         }
-        
-        window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 50));
-        fetchData();
-    });
+
+        // ═══ CARD SOUNDS ═══
+        function initCardSounds() {
+            document.querySelectorAll('.mcard').forEach(card => { card.addEventListener('mouseenter', SFX.hover); });
+        }
+
+        // ═══ FETCH DATA ═══
+        async function fetchData() {
+            renderSkels();
+            let data = SAMPLE;
+            if (CONFIG.SHEET_ID && CONFIG.SHEET_ID !== 'REPLACE_SHEET_ID') {
+                try {
+                    const response = await fetch(`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`);
+                    if (response.ok) {
+                        const csv = await response.text();
+                        const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
+                        const dt = parsed.data.filter(x => x.title);
+                        if (dt.length) { data = dt; try { localStorage.setItem(CONFIG.CACHE, JSON.stringify(dt)); } catch(e) {} }
+                    }
+                } catch(e) {
+                    try { const cached = localStorage.getItem(CONFIG.CACHE); if (cached) data = JSON.parse(cached); } catch(e2) {}
+                }
+            }
+            movies = data; filtered = [...movies];
+            document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
+
+            // v: Update ticker with loaded movie data
+            updateTicker(movies);
+
+            renderCards();
+        }
+
+        // ═══ LINKS ═══
+        function getChannelUrl()  { return CONFIG.CHANNEL   === 'REPLACE_CHANNEL_LINK'   ? 'https://t.me/'      : CONFIG.CHANNEL; }
+        function getInstagramUrl(){ return CONFIG.INSTAGRAM === 'REPLACE_INSTAGRAM_LINK' ? 'https://instagram.com/' : CONFIG.INSTAGRAM; }
+        function getBotUrl()      { const b = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT; return `https://t.me/${b}`; }
+
+        function initLinks() {
+            const ch = getChannelUrl(), ig = getInstagramUrl(), bt = getBotUrl();
+            document.getElementById('join-btn').addEventListener('click', () => { window.open(ch, '_blank'); SFX.click(); });
+            document.getElementById('tg-link').href    = ch;
+            document.getElementById('ig-link').href    = ig;
+            document.getElementById('fl-channel').href = ch;
+            document.getElementById('fl-insta').href   = ig;
+            document.getElementById('fl-bot').href     = bt;
+            document.getElementById('fl-request').href = bt;
+        }
+
+        // ═══ INIT ═══
+        function init() {
+            initThree();
+            initCursor();
+            initLenis();
+            initLoader();
+            initNav();
+            initPills();
+            initSearch();
+            initFlip();
+            initMagnetic();
+            initLinks();
+            fetchData();
+
+            // Auto refresh from sheet
+            setInterval(() => {
+                if (CONFIG.SHEET_ID && CONFIG.SHEET_ID !== 'REPLACE_SHEET_ID') { fetchData(); }
+            }, CONFIG.REFRESH);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    })();
     </script>
 </body>
 </html>
