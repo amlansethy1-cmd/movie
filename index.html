@@ -20,7 +20,8 @@
         :root {
             --bg: #070707; --bg2: #0D0D0D; --card: #111111;
             --acc: #FF3D00; --acc2: #FF6B35;
-            --glow: rgba(255,61,0,0.2); --glows: rgba(255,61,0,0.4);
+            --glow: rgba(255,61,0,0.1); /* Reduced Glow */
+            --glows: rgba(255,61,0,0.2);
             --glass: rgba(255,255,255,0.03); --gb: rgba(255,255,255,0.07);
             --t: #FFFFFF; --t2: #888888; --t3: #444444; --bdr: #1A1A1A;
         }
@@ -43,7 +44,7 @@
             position: fixed; width: 8px; height: 8px; background: var(--acc);
             border-radius: 50%; pointer-events: none; z-index: 10000;
             transform: translate(-50%,-50%);
-            box-shadow: 0 0 16px var(--acc), 0 0 32px rgba(255,61,0,0.4);
+            box-shadow: 0 0 10px var(--acc); /* Subdued */
             will-change: left,top; transition: transform 0.15s ease, opacity 0.2s ease;
         }
         #cring {
@@ -51,10 +52,11 @@
             border-radius: 50%; pointer-events: none; z-index: 9999;
             transform: translate(-50%,-50%);
             transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, transform 0.15s cubic-bezier(0.23,1,0.32,1);
-            box-shadow: 0 0 0 4px var(--glow); will-change: left,top,transform;
+            box-shadow: 0 0 0 2px var(--glow); /* Subdued */
+            will-change: left,top,transform;
         }
         #cdot.hover { transform: translate(-50%,-50%) scale(0); }
-        #cring.hover { transform: translate(-50%,-50%) scale(2.2); opacity: 0.4; }
+        #cring.hover { transform: translate(-50%,-50%) scale(2.2); opacity: 0.3; }
         @media (max-width: 768px) { #cdot, #cring { display: none !important; } * { cursor: auto !important; } }
 
         /* ── Three.js Canvas ── */
@@ -106,7 +108,6 @@
         .nlink:hover { color: var(--acc); }
         .nlink:hover::after { width: 100%; }
 
-        /* Nav search icon - shows when scrolled */
         .nsrch {
             width: 36px; height: 36px; border-radius: 50%;
             border: 1px solid var(--bdr); background: transparent;
@@ -122,9 +123,9 @@
             background: linear-gradient(135deg, var(--acc), var(--acc2));
             color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px;
             letter-spacing: 1px; padding: 10px 26px; border-radius: 6px; border: none;
-            box-shadow: 0 4px 24px rgba(255,61,0,0.35);
+            box-shadow: 0 4px 20px rgba(255,61,0,0.2);
             transition: box-shadow 0.25s ease, transform 0.25s ease;
-            position: relative; overflow: hidden; white-space: nowrap;
+            position: relative; overflow: hidden; white-space: nowrap; cursor: pointer;
         }
         .nbtn::before {
             content: ''; position: absolute; inset: 0;
@@ -132,13 +133,13 @@
             transform: translateX(-100%); transition: transform 0.5s ease;
         }
         .nbtn:hover::before { transform: translateX(100%); }
-        .nbtn:hover { box-shadow: 0 8px 32px rgba(255,61,0,0.55); transform: translateY(-2px); }
+        .nbtn:hover { box-shadow: 0 6px 24px rgba(255,61,0,0.35); transform: translateY(-2px); }
 
         /* ── Hero ── */
         .hero {
-            min-height: 100vh; min-height: 100dvh; position: relative; z-index: 1;
-            display: flex; align-items: center; justify-content: center;
-            padding: 100px 20px 60px; overflow: hidden;
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 140px 20px 40px; overflow: hidden;
         }
         .grain {
             position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -152,7 +153,7 @@
         .hcontent.vis { opacity: 1; transform: translateY(0); }
         .badge {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.35);
+            background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.25);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             color: var(--acc); font-size: 10px; font-weight: 600; letter-spacing: 3px;
             padding: 8px 20px; border-radius: 100px; margin-bottom: 28px;
@@ -164,7 +165,8 @@
         .flip-wrap { display: inline-block; perspective: 1000px; vertical-align: bottom; }
         .flip-word {
             display: inline-block; color: var(--acc); will-change: transform;
-            text-shadow: 0 0 10px rgba(255,61,0,0.8), 0 0 25px rgba(255,61,0,0.4);
+            /* Glow reduced */
+            text-shadow: 0 0 8px rgba(255,61,0,0.25);
         }
         .hsub {
             font-size: clamp(13px,2.5vw,15px); font-weight: 300; color: var(--t2);
@@ -172,9 +174,9 @@
         }
 
         /* ── Animated Search Box ── */
-        .sbar { max-width: 640px; margin: 0 auto 28px; position: relative; padding: 0 16px; }
+        .sbar { max-width: 660px; margin: 0 auto; position: relative; padding: 0 16px; }
         .sbox {
-            background: rgba(10,10,10,0.8); border-radius: 14px; padding: 2px;
+            background: rgba(10,10,10,0.8); border-radius: 16px; padding: 6px;
             display: flex; align-items: center; position: relative; overflow: hidden; z-index: 1;
         }
         .sbox::before {
@@ -184,44 +186,32 @@
         }
         .sbox::after {
             content: ''; position: absolute; inset: 1px;
-            background: rgba(15,15,15,0.95); border-radius: 13px; z-index: -1;
+            background: rgba(15,15,15,0.95); border-radius: 15px; z-index: -1;
             backdrop-filter: blur(24px);
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .sbox:focus-within::before { background: conic-gradient(transparent, transparent, var(--acc2), var(--acc)); animation: spin 1.5s linear infinite; }
         .sicon, .sinput, .sbtn { position: relative; z-index: 2; }
-        .sicon { left: 20px; top: 50%; transform: translateY(-50%); color: #555; width: 18px; height: 18px; flex-shrink: 0; pointer-events: none; position: absolute; }
-        .sinput { flex: 1; background: transparent; border: none; outline: none; padding: 14px 14px 14px 45px; font-family: 'Montserrat', sans-serif; font-size: 15px; color: #fff; min-width: 0; }
-        .sinput::placeholder { color: #444; }
+        .sicon { left: 24px; top: 50%; transform: translateY(-50%); color: #555; width: 18px; height: 18px; flex-shrink: 0; pointer-events: none; position: absolute; }
+        .sinput { flex: 1; background: transparent; border: none; outline: none; padding: 14px 16px 14px 48px; font-family: 'Montserrat', sans-serif; font-size: 15px; color: #fff; min-width: 0; }
+        .sinput::placeholder { color: #555; }
         .sbtn {
             background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff;
             font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
-            padding: 11px 26px; border-radius: 9px; border: none;
-            box-shadow: 0 4px 20px rgba(255,61,0,0.4);
+            padding: 12px 28px; border-radius: 10px; border: none;
+            box-shadow: 0 4px 15px rgba(255,61,0,0.2);
             transition: box-shadow 0.2s ease, transform 0.2s ease;
-            flex-shrink: 0; white-space: nowrap; margin-right: 4px;
+            flex-shrink: 0; white-space: nowrap; margin-right: 2px; cursor: pointer;
         }
-        .sbtn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,61,0,0.55); }
+        .sbtn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,61,0,0.35); }
         .sbtn:active { transform: scale(0.97); }
 
-        /* ── Category Pills ── */
-        .pills {
-            display: flex; gap: 10px; justify-content: center;
-            flex-wrap: wrap; padding: 0 16px;
-        }
-        .pill {
-            border: 1px solid var(--bdr); border-radius: 100px; padding: 8px 20px;
-            font-size: 11px; font-weight: 600; color: var(--t2); background: transparent;
-            transition: all 0.25s ease; letter-spacing: 0.5px; white-space: nowrap;
-        }
-        .pill.active { background: var(--acc); color: #fff; border-color: var(--acc); box-shadow: 0 4px 20px rgba(255,61,0,0.35); }
-        .pill:hover:not(.active) { border-color: rgba(255,61,0,0.45); color: #fff; transform: translateY(-2px); }
-
-        /* ── Ticker (replaces Stats) ── */
+        /* ── Ticker Section ── */
         .ticker-section {
             background: var(--bg2); border-top: 1px solid var(--bdr);
             border-bottom: 1px solid var(--bdr);
-            padding: 0; position: relative; z-index: 1; overflow: hidden;
+            padding: 0; position: relative; z-index: 5; overflow: hidden;
+            margin-top: 60px; width: 100%;
         }
         .ticker-label {
             position: absolute; left: 0; top: 0; bottom: 0; z-index: 5;
@@ -242,28 +232,60 @@
             position: absolute; right: 0; top: 0; bottom: 0; width: 80px; z-index: 4;
             background: linear-gradient(270deg, var(--bg2), transparent); pointer-events: none;
         }
-        .ticker-track { overflow: hidden; padding: 18px 0 18px 110px; }
+        .ticker-track { overflow: hidden; padding: 14px 0 14px 110px; }
         .ticker-inner {
-            display: flex; gap: 0; width: max-content;
+            display: flex; align-items: center; gap: 0; width: max-content;
             animation: tickerScroll 40s linear infinite;
         }
         .ticker-inner:hover { animation-play-state: paused; }
+        
+        /* ── Interactive Ticker Items ── */
         .ticker-item {
             display: inline-flex; align-items: center; gap: 10px;
-            padding: 0 28px; white-space: nowrap;
+            padding: 6px 20px; margin: 0 8px; white-space: nowrap; text-decoration: none;
+            border-radius: 50px; cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
-        .ticker-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--t2); transition: color 0.2s; letter-spacing: 0.5px; }
-        .ticker-item:hover .ticker-title { color: var(--t); }
+        .ticker-item:hover {
+            background: rgba(255,255,255,0.05); transform: translateY(-2px);
+        }
+        .ticker-title { 
+            font-family: 'Bebas Neue', sans-serif; font-size: 20px; 
+            color: var(--t2); transition: color 0.3s ease, text-shadow 0.3s ease; letter-spacing: 0.5px; 
+        }
+        .ticker-item:hover .ticker-title { 
+            color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.1);
+        }
         .ticker-cat {
             font-size: 8px; font-weight: 700; letter-spacing: 1.5px; color: var(--acc);
-            background: rgba(255,61,0,0.1); border: 1px solid rgba(255,61,0,0.2);
+            background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.15);
             padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+            transition: box-shadow 0.3s ease, background 0.3s ease;
         }
-        .ticker-sep { color: var(--bdr); font-size: 12px; }
+        .ticker-item:hover .ticker-cat {
+            box-shadow: 0 0 8px rgba(255,61,0,0.3); background: rgba(255,61,0,0.15); color: #fff;
+        }
+        .ticker-sep { color: var(--bdr); font-size: 12px; margin-left: 10px; pointer-events: none;}
         @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
+        /* ── Category Pills ── */
+        .pills-section {
+            padding: 40px 16px 0; position: relative; z-index: 5;
+            max-width: 1500px; margin: 0 auto;
+        }
+        .pills {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; 
+        }
+        .pill {
+            border: 1px solid var(--bdr); border-radius: 100px; padding: 8px 20px;
+            font-size: 11px; font-weight: 600; color: var(--t2); background: transparent;
+            transition: all 0.25s ease; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer;
+        }
+        .pill.active { background: var(--acc); color: #fff; border-color: var(--acc); box-shadow: 0 4px 15px rgba(255,61,0,0.25); }
+        .pill:hover:not(.active) { border-color: rgba(255,61,0,0.4); color: #fff; transform: translateY(-2px); }
+
         /* ── Movies Section ── */
-        .msec { position: relative; z-index: 1; padding: 80px 24px; max-width: 1500px; margin: 0 auto; }
+        .msec { position: relative; z-index: 1; padding: 40px 24px 80px; max-width: 1500px; margin: 0 auto; }
         .mhdr { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 44px; gap: 20px; }
         .mhl { display: flex; flex-direction: column; }
         .mlbl { font-size: 10px; letter-spacing: 3px; color: var(--acc); font-weight: 700; margin-bottom: 4px; }
@@ -287,12 +309,10 @@
         }
         .mcard.vis { opacity: 1; transform: translateY(0); }
 
-        /* Desktop: allow 3D pop-out */
         @media (min-width: 769px) {
             .mcard { overflow: visible; background: transparent; }
             .mcard:hover { z-index: 10; }
         }
-        /* Mobile: clip cleanly */
         @media (max-width: 768px) {
             .mcard { overflow: hidden; background: var(--card); border: 1px solid var(--bdr); }
         }
@@ -305,7 +325,7 @@
             transition: border-color 0.3s ease;
         }
         .poster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), filter 0.4s; }
-        .mcard:hover .poster { border-color: rgba(255,61,0,0.45); }
+        .mcard:hover .poster { border-color: rgba(255,61,0,0.35); }
         .mcard:hover .poster img { transform: scale(1.08); filter: brightness(0.5); }
 
         .govl {
@@ -330,7 +350,6 @@
         .fallback svg { width: 44px; height: 44px; opacity: 0.1; }
         .fallback-initials { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #1e1e1e; margin-top: 8px; }
 
-        /* Card Info - below poster, pops forward on hover */
         .cinfo {
             padding: 16px; background: var(--card);
             border: 1px solid var(--bdr); border-top: none;
@@ -341,8 +360,8 @@
         }
         .mcard:hover .cinfo {
             transform: translateZ(32px);
-            border-color: rgba(255,61,0,0.4);
-            box-shadow: 0 28px 56px rgba(0,0,0,0.8), 0 0 0 0 transparent;
+            border-color: rgba(255,61,0,0.3);
+            box-shadow: 0 28px 56px rgba(0,0,0,0.7), 0 0 0 0 transparent;
             background: rgba(12,12,12,0.98);
         }
 
@@ -362,15 +381,51 @@
             background: linear-gradient(135deg, var(--acc), var(--acc2));
             color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 14px;
             letter-spacing: 1px; border: none; border-radius: 6px;
-            box-shadow: 0 4px 16px rgba(255,61,0,0.22);
-            display: flex; align-items: center; justify-content: center; gap: 6px;
+            box-shadow: 0 4px 15px rgba(255,61,0,0.15);
+            display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s;
         }
 
-        .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 12px rgba(0,0,0,0.9); }
+        .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
         .mcard:hover .cmeta  { transform: translateZ(10px); }
-        .mcard:hover .cbot   { transform: translateZ(28px); box-shadow: 0 12px 28px rgba(255,61,0,0.45); }
+        .mcard:hover .cbot   { transform: translateZ(28px); box-shadow: 0 10px 24px rgba(255,61,0,0.35); }
         .cbot:active { transform: scale(0.97); }
+
+        /* ── Quality Modal (NEW) ── */
+        .qmodal {
+            position: fixed; inset: 0; z-index: 10500;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease;
+        }
+        .qmodal.vis { opacity: 1; visibility: visible; }
+        .qbox {
+            background: var(--card); border: 1px solid #222;
+            padding: 32px; border-radius: 16px; width: 90%; max-width: 360px;
+            text-align: center; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            position: relative;
+        }
+        .qmodal.vis .qbox { transform: translateY(0); }
+        .qclose {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(255,255,255,0.05); border: none; color: var(--t2);
+            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .qclose:hover { background: var(--acc); color: #fff; }
+        .qtitle { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 6px; color: #fff; letter-spacing: 1.5px; }
+        .qsub { font-size: 12px; color: var(--t2); margin-bottom: 24px; }
+        .qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .qbtn {
+            background: linear-gradient(135deg, #151515, #0a0a0a); border: 1px solid var(--bdr);
+            color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
+            padding: 16px 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .qbtn:hover { 
+            border-color: var(--acc); background: rgba(255,61,0,0.1); 
+            transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,61,0,0.15); 
+        }
 
         /* ── Skeleton Cards ── */
         .skel { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; overflow: hidden; }
@@ -385,12 +440,12 @@
         .nores h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px,10vw,64px); color: #1a1a1a; margin-bottom: 12px; }
         .nores p { color: #444; font-size: 14px; margin-bottom: 28px; }
         .nores-btn {
-            background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; border: none;
+            background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; border: none; cursor: pointer;
             padding: 14px 32px; border-radius: 8px; font-family: 'Bebas Neue', sans-serif;
-            font-size: 17px; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(255,61,0,0.35);
+            font-size: 17px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(255,61,0,0.25);
             transition: all 0.25s ease;
         }
-        .nores-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,61,0,0.5); }
+        .nores-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,61,0,0.4); }
 
         /* ── Footer ── */
         footer { background: #050505; border-top: 1px solid var(--bdr); padding: 72px 24px 36px; position: relative; z-index: 1; }
@@ -438,15 +493,18 @@
             .nlink { display: none; }
             .nbtn { padding: 8px 16px; font-size: 13px; }
             .nsrch { opacity: 1 !important; pointer-events: all !important; transform: scale(1) !important; }
-            .hero { padding: 100px 16px 50px; min-height: auto; }
+            .hero { padding: 120px 16px 40px; }
             .badge { font-size: 8px; padding: 6px 14px; letter-spacing: 1.5px; }
             .sbar { padding: 0 8px; }
-            .sinput { padding: 12px 12px 12px 44px; font-size: 14px; }
-            .sicon { left: 28px; }
-            .sbtn { padding: 12px 18px; font-size: 14px; }
+            .sbox { padding: 4px; }
+            .sinput { padding: 12px 12px 12px 42px; font-size: 14px; }
+            .sicon { left: 24px; }
+            .sbtn { padding: 10px 20px; font-size: 14px; }
+            .ticker-section { margin-top: 40px; }
             .pills { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 8px 8px; scrollbar-width: none; -ms-overflow-style: none; }
             .pills::-webkit-scrollbar { display: none; }
-            .msec { padding: 56px 16px; }
+            .pills-section { padding-top: 30px; }
+            .msec { padding: 40px 16px 60px; }
             .mhdr { flex-direction: column; align-items: flex-start; gap: 12px; }
             .fgrid { grid-template-columns: 1fr; gap: 36px; text-align: center; }
             .ftagline { max-width: none; margin: 12px auto 0; }
@@ -472,6 +530,20 @@
         <div class="ll-pct" id="lp">0%</div>
     </div>
 
+    <div class="qmodal" id="qmodal">
+        <div class="qbox">
+            <button class="qclose" id="qclose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            <div class="qtitle">SELECT QUALITY</div>
+            <div class="qsub">Choose your preferred resolution</div>
+            <div class="qgrid">
+                <button class="qbtn" data-q="480p">480p (SD)</button>
+                <button class="qbtn" data-q="720p">720p (HD)</button>
+                <button class="qbtn" data-q="1080p">1080p (FHD)</button>
+                <button class="qbtn" data-q="2160p">4K (UHD)</button>
+            </div>
+        </div>
+    </div>
+
     <nav id="nav">
         <a href="#" class="nlogo">
             <svg viewBox="0 0 200 200" fill="none">
@@ -488,7 +560,6 @@
         <div class="nright">
             <a href="#msec" class="nlink">MOVIES</a>
             <a href="#footer" class="nlink">ABOUT</a>
-            <!-- Search icon — always visible on mobile, fades in on scroll for desktop -->
             <button class="nsrch" id="nsrch" title="Search">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -501,20 +572,15 @@
     <section class="hero" id="hero">
         <div class="grain"></div>
         <div class="hcontent" id="hc">
-            <!-- iii: Updated badge text -->
             <div class="badge">🎬 MOVIES &amp; WEB SERIES — CONNECT TO CINE UNDERGROUND</div>
-
-            <!-- iv: Removed "HERE." line -->
             <div class="headline">
                 FIND YOUR<br>
                 NEXT <span class="flip-wrap"><span id="fw" class="flip-word">OBSESSION</span></span>
             </div>
-
             <p class="hsub">
                 Search our ever-growing collection of movies &amp; web series.<br>
                 One click. Direct Telegram access. No signup required.
             </p>
-
             <div class="sbar">
                 <div class="sbox" id="sbox">
                     <svg class="sicon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -524,12 +590,9 @@
                     <button class="sbtn" id="search-btn">SEARCH</button>
                 </div>
             </div>
-            <div class="pills" id="pills"></div>
-            <!-- v: scroll-ind removed -->
         </div>
     </section>
 
-    <!-- v: Stats replaced with movie ticker -->
     <section class="ticker-section" id="ticker-section">
         <div class="ticker-label">🔥 NOW IN</div>
         <div class="ticker-fade-left"></div>
@@ -537,6 +600,10 @@
         <div class="ticker-track">
             <div class="ticker-inner" id="ticker"></div>
         </div>
+    </section>
+
+    <section class="pills-section">
+        <div class="pills" id="pills"></div>
     </section>
 
     <section class="msec" id="msec">
@@ -642,6 +709,7 @@
         let tCamX = 0, tCamY = 5;
         let mWorld = { x: 0, y: 0, z: 0 };
         let lenis = null;
+        let currentBotKeyword = '';
 
         // ═══ UTILS ═══
         function lerp(a, b, t) { return a * (1 - t) + b * t; }
@@ -740,7 +808,6 @@
                         float dist = length(pos.xz - uMouse);
                         if (dist < 4.0) { pos.y += (4.0 - dist) * 1.2 * sin(uTime * 6.0); }
                         vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-                        /* Smaller dot size */
                         float sz = clamp(1.2 + pos.y * 0.15, 0.4, 2.5);
                         gl_PointSize = sz * (70.0 / -mv.z);
                         gl_Position = projectionMatrix * mv;
@@ -807,10 +874,10 @@
             }
             document.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; });
             document.addEventListener('mouseover', (e) => {
-                if (e.target.closest('button, a, .pill, .mcard')) { dot.classList.add('hover'); ring.classList.add('hover'); }
+                if (e.target.closest('button, a, .pill, .mcard, .ticker-item')) { dot.classList.add('hover'); ring.classList.add('hover'); }
             });
             document.addEventListener('mouseout', (e) => {
-                if (e.target.closest('button, a, .pill, .mcard')) { dot.classList.remove('hover'); ring.classList.remove('hover'); }
+                if (e.target.closest('button, a, .pill, .mcard, .ticker-item')) { dot.classList.remove('hover'); ring.classList.remove('hover'); }
             });
             track();
         }
@@ -818,7 +885,7 @@
         // ═══ MAGNETIC BUTTONS ═══
         function initMagnetic() {
             if (window.innerWidth < 769) return;
-            document.querySelectorAll('.nbtn, .sbtn').forEach(btn => {
+            document.querySelectorAll('.nbtn, .sbtn, .qclose').forEach(btn => {
                 btn.addEventListener('mousemove', (e) => {
                     const rect = btn.getBoundingClientRect();
                     const x = (e.clientX - rect.left - rect.width/2) * 0.25;
@@ -895,7 +962,6 @@
             const nav = document.getElementById('nav');
             window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', scrollY > 50); }, { passive: true });
 
-            // vi: Nav search icon → scroll to hero search and focus
             document.getElementById('nsrch').addEventListener('click', () => {
                 SFX.click();
                 const input = document.getElementById('si');
@@ -928,14 +994,12 @@
             const searchBtn = document.getElementById('search-btn');
             input.addEventListener('input', debounce(() => { q = input.value.toLowerCase().trim(); doFilter(); }, 220));
             input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
-            // i: Search button → filter + scroll to movies section
             searchBtn.addEventListener('click', () => { doSearch(); SFX.click(); });
         }
 
         function doSearch() {
             q = document.getElementById('si').value.toLowerCase().trim();
             doFilter();
-            // i: Always scroll to movies section on search
             setTimeout(() => {
                 document.getElementById('msec').scrollIntoView({ behavior: 'smooth' });
             }, 100);
@@ -954,14 +1018,47 @@
             renderCards();
         }
 
-        // ═══ TICKER (v: replaces stats) ═══
+        // ═══ GLOBAL OPENS MODAL ═══
+        window.openQualityModal = function(keyword) {
+            currentBotKeyword = keyword;
+            document.getElementById('qmodal').classList.add('vis');
+            SFX.click();
+        };
+
+        // ═══ QUALITY MODAL LOGIC ═══
+        function initQualityModal() {
+            const modal = document.getElementById('qmodal');
+            const closeBtn = document.getElementById('qclose');
+
+            closeBtn.addEventListener('click', () => { modal.classList.remove('vis'); SFX.click(); });
+            modal.addEventListener('click', (e) => { if(e.target === modal) { modal.classList.remove('vis'); } });
+
+            document.querySelectorAll('.qbtn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const quality = btn.getAttribute('data-q');
+                    const botUsername = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
+                    
+                    // Creates deeplink: ?start=keyword_quality (e.g. ?start=animal_1080p)
+                    // P.S. Agar bot ka format alag hai, toh format ko yaha edit kar lena bhai
+                    const deeplink = `https://t.me/${botUsername}?start=${encodeURIComponent(currentBotKeyword)}_${quality}`;
+                    
+                    window.open(deeplink, '_blank');
+                    modal.classList.remove('vis');
+                    SFX.click();
+                });
+            });
+        }
+
+        // ═══ TICKER (Now Triggers Modal) ═══
         function updateTicker(data) {
             const ticker = document.getElementById('ticker');
             if (!ticker || !data.length) return;
 
-            const items = data.map(m => `
-                <div class="ticker-item">
-                    <span class="ticker-cat">${m.category || ''}</span>
+            const latestData = [...data].sort((a,b) => (parseInt(b.year)||0) - (parseInt(a.year)||0)).slice(0, 15);
+
+            const items = latestData.map(m => `
+                <div class="ticker-item" onclick="openQualityModal('${m.deeplink_keyword}')">
+                    <span class="ticker-cat">${m.category || 'NEW'}</span>
                     <span class="ticker-title">${m.title}</span>
                     <span class="ticker-sep">◆</span>
                 </div>
@@ -971,7 +1068,7 @@
             ticker.innerHTML = items + items;
 
             // Adjust speed: longer = faster scroll
-            const duration = Math.max(25, data.length * 2.5);
+            const duration = Math.max(25, latestData.length * 3);
             ticker.style.animationDuration = duration + 's';
         }
 
@@ -987,14 +1084,24 @@
             }
         }
 
-        // ═══ FETCH POSTER ═══
-        async function fetchPoster(title) {
-            const key = CONFIG.POSTER + title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+        // ═══ FETCH POSTER (Updated with TMDB Year Query) ═══
+        async function fetchPoster(title, year) {
+            // Updated Cache key to include year so old cached images don't clash
+            const yearStr = year ? `-${year}` : '';
+            const key = CONFIG.POSTER + title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + yearStr;
+            
             try { const cached = localStorage.getItem(key); if (cached) return cached === 'NULL' ? null : cached; } catch(e) {}
             if (CONFIG.TMDB === 'REPLACE_TMDB_KEY') return null;
             await new Promise(r => setTimeout(r, 80));
+            
             try {
-                const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${CONFIG.TMDB}&language=en-US`, { signal: AbortSignal.timeout(5000) });
+                // Modified URL to include primary_release_year if year is provided in sheet
+                let apiUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${CONFIG.TMDB}&language=en-US`;
+                if (year && !isNaN(parseInt(year))) {
+                    apiUrl += `&primary_release_year=${parseInt(year)}`;
+                }
+
+                const response = await fetch(apiUrl, { signal: AbortSignal.timeout(5000) });
                 const json = await response.json();
                 if (json.results?.[0]?.poster_path) {
                     const url = `https://image.tmdb.org/t/p/w500${json.results[0].poster_path}`;
@@ -1014,11 +1121,9 @@
             if (!filtered.length) {
                 const noRes = document.createElement('div');
                 noRes.className = 'nores';
-                noRes.innerHTML = `<h2>NO RESULTS</h2><p>Try different keywords or request on bot</p><button class="nores-btn" onclick="window.open('${getChannelUrl()}','_blank')">REQUEST ON BOT</button>`;
+                noRes.innerHTML = `<h2>NO RESULTS</h2><p>Try different keywords or request on bot</p><button class="nores-btn" onclick="window.open('${getBotUrl()}','_blank')">REQUEST ON BOT</button>`;
                 grid.appendChild(noRes); return;
             }
-
-            const botUsername = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
 
             filtered.forEach((m, i) => {
                 const card = document.createElement('div');
@@ -1032,23 +1137,19 @@
                     <div class="cinfo">
                         <div class="ctitle">${m.title}</div>
                         <div class="cmeta">${m.year || ''} • ${m.language || ''}</div>
-                        <!-- ii: Button text changed to GET LINK -->
-                        <button class="cbot" data-link="https://t.me/${botUsername}?start=${encodeURIComponent(m.deeplink_keyword)}">🔗 GET LINK</button>
+                        <button class="cbot" onclick="openQualityModal('${m.deeplink_keyword}')">🔗 GET LINK</button>
                     </div>
                 `;
                 grid.appendChild(card);
                 setTimeout(() => card.classList.add('vis'), i * 50);
             });
 
-            document.querySelectorAll('.cbot').forEach(btn => {
-                btn.addEventListener('click', () => { window.open(btn.dataset.link, '_blank'); SFX.click(); });
-            });
-
             initTilt(); initMagnetic(); initCardSounds();
 
             for (let i = 0; i < filtered.length; i++) {
                 const m = filtered[i]; const el = document.getElementById('p' + i); if (!el) continue;
-                const url = await fetchPoster(m.title);
+                // Passed m.year to fetchPoster to ensure the correct movie is fetched
+                const url = await fetchPoster(m.title, m.year);
                 if (url) {
                     const img = document.createElement('img');
                     img.src = url; img.alt = m.title; img.loading = 'lazy';
@@ -1103,9 +1204,7 @@
             movies = data; filtered = [...movies];
             document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
 
-            // v: Update ticker with loaded movie data
             updateTicker(movies);
-
             renderCards();
         }
 
@@ -1136,6 +1235,7 @@
             initSearch();
             initFlip();
             initMagnetic();
+            initQualityModal(); // NEW MODAL INIT
             initLinks();
             fetchData();
 
