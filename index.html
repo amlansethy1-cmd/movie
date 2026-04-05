@@ -20,10 +20,10 @@
         :root {
             --bg: #070707; --bg2: #0D0D0D; --card: #111111;
             --acc: #FF3D00; --acc2: #FF6B35;
-            --glow: rgba(255,61,0,0.1); /* Reduced Glow */
-            --glows: rgba(255,61,0,0.2);
+            --glow: rgba(255,61,0,0.15); 
+            --glows: rgba(255,61,0,0.3);
             --glass: rgba(255,255,255,0.03); --gb: rgba(255,255,255,0.07);
-            --t: #FFFFFF; --t2: #888888; --t3: #444444; --bdr: #1A1A1A;
+            --t: #FFFFFF; --t2: #999999; --t3: #555555; --bdr: #1A1A1A;
         }
 
         html { scroll-behavior: auto; -webkit-tap-highlight-color: transparent; }
@@ -44,7 +44,7 @@
             position: fixed; width: 8px; height: 8px; background: var(--acc);
             border-radius: 50%; pointer-events: none; z-index: 10000;
             transform: translate(-50%,-50%);
-            box-shadow: 0 0 10px var(--acc); /* Subdued */
+            box-shadow: 0 0 12px var(--acc);
             will-change: left,top; transition: transform 0.15s ease, opacity 0.2s ease;
         }
         #cring {
@@ -52,11 +52,11 @@
             border-radius: 50%; pointer-events: none; z-index: 9999;
             transform: translate(-50%,-50%);
             transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, transform 0.15s cubic-bezier(0.23,1,0.32,1);
-            box-shadow: 0 0 0 2px var(--glow); /* Subdued */
+            box-shadow: 0 0 0 2px var(--glow);
             will-change: left,top,transform;
         }
         #cdot.hover { transform: translate(-50%,-50%) scale(0); }
-        #cring.hover { transform: translate(-50%,-50%) scale(2.2); opacity: 0.3; }
+        #cring.hover { transform: translate(-50%,-50%) scale(2.2); opacity: 0.4; }
         @media (max-width: 768px) { #cdot, #cring { display: none !important; } * { cursor: auto !important; } }
 
         /* ── Three.js Canvas ── */
@@ -84,6 +84,49 @@
         .ll-bar-wrap { width: 220px; height: 2px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
         .ll-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--acc), var(--acc2)); border-radius: 2px; transition: width 0.05s linear; }
         .ll-pct { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--acc); margin-top: 18px; letter-spacing: 2px; }
+
+        /* ── Dynamic Quality Modal (Sharp & Premium) ── */
+        .qmodal {
+            position: fixed; inset: 0; z-index: 10500;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease;
+        }
+        .qmodal.vis { opacity: 1; visibility: visible; }
+        .qbox {
+            background: var(--card); border: 1px solid rgba(255,61,0,0.2);
+            padding: 32px 24px; border-radius: 16px; width: 90%; max-width: 400px;
+            text-align: center; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 20px rgba(255,61,0,0.05);
+            position: relative; max-height: 85vh; display: flex; flex-direction: column;
+        }
+        .qmodal.vis .qbox { transform: translateY(0); }
+        .qclose {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,255,255,0.05); border: none; color: var(--t2);
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .qclose:hover { background: var(--acc); color: #fff; transform: rotate(90deg); }
+        .qtitle { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 4px; color: #fff; letter-spacing: 1.5px; }
+        .qsub { font-size: 12px; color: var(--t2); margin-bottom: 24px; }
+        .qgrid-wrapper {
+            overflow-y: auto; padding-right: 4px; flex: 1;
+            /* Scrollbar for modal */
+            scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
+        }
+        .qgrid-wrapper::-webkit-scrollbar { width: 4px; }
+        .qgrid-wrapper::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 4px; }
+        .qgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+        .qbtn {
+            background: linear-gradient(135deg, #151515, #0a0a0a); border: 1px solid var(--bdr);
+            color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px;
+            padding: 14px 10px; border-radius: 8px; cursor: pointer; transition: all 0.25s ease;
+        }
+        .qbtn:hover { 
+            border-color: var(--acc); background: rgba(255,61,0,0.15); 
+            transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,61,0,0.25); color: #fff;
+        }
 
         /* ── Navbar ── */
         nav {
@@ -123,7 +166,7 @@
             background: linear-gradient(135deg, var(--acc), var(--acc2));
             color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px;
             letter-spacing: 1px; padding: 10px 26px; border-radius: 6px; border: none;
-            box-shadow: 0 4px 20px rgba(255,61,0,0.2);
+            box-shadow: 0 4px 20px rgba(255,61,0,0.25);
             transition: box-shadow 0.25s ease, transform 0.25s ease;
             position: relative; overflow: hidden; white-space: nowrap; cursor: pointer;
         }
@@ -133,7 +176,7 @@
             transform: translateX(-100%); transition: transform 0.5s ease;
         }
         .nbtn:hover::before { transform: translateX(100%); }
-        .nbtn:hover { box-shadow: 0 6px 24px rgba(255,61,0,0.35); transform: translateY(-2px); }
+        .nbtn:hover { box-shadow: 0 6px 24px rgba(255,61,0,0.45); transform: translateY(-2px); }
 
         /* ── Hero ── */
         .hero {
@@ -144,7 +187,7 @@
         .grain {
             position: absolute; inset: 0; z-index: 2; pointer-events: none;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E") repeat;
-            opacity: 0.04; animation: grain 0.5s steps(2) infinite; mix-blend-mode: overlay;
+            opacity: 0.05; animation: grain 0.5s steps(2) infinite; mix-blend-mode: overlay;
         }
         .hcontent {
             position: relative; z-index: 3; max-width: 920px; text-align: center; width: 100%;
@@ -152,32 +195,32 @@
         }
         .hcontent.vis { opacity: 1; transform: translateY(0); }
         .badge {
-            display: inline-flex; align-items: center; gap: 8px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.25);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            color: var(--acc); font-size: 10px; font-weight: 600; letter-spacing: 3px;
-            padding: 8px 20px; border-radius: 100px; margin-bottom: 28px;
+            color: var(--acc); font-size: 11px; font-weight: 600; letter-spacing: 2px;
+            padding: 8px 24px; border-radius: 100px; margin-bottom: 28px;
         }
         .headline {
             font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px,10vw,130px);
-            line-height: 0.9; letter-spacing: 1px; margin-bottom: 28px;
+            line-height: 0.9; letter-spacing: 1px; margin-bottom: 28px; text-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .flip-wrap { display: inline-block; perspective: 1000px; vertical-align: bottom; }
         .flip-word {
             display: inline-block; color: var(--acc); will-change: transform;
-            /* Glow reduced */
             text-shadow: 0 0 8px rgba(255,61,0,0.25);
         }
         .hsub {
-            font-size: clamp(13px,2.5vw,15px); font-weight: 300; color: var(--t2);
-            line-height: 1.9; max-width: 480px; margin: 0 auto 42px;
+            font-size: clamp(13px,2.5vw,15px); font-weight: 400; color: #ccc;
+            line-height: 1.9; max-width: 480px; margin: 0 auto 42px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         /* ── Animated Search Box ── */
         .sbar { max-width: 660px; margin: 0 auto; position: relative; padding: 0 16px; }
         .sbox {
-            background: rgba(10,10,10,0.8); border-radius: 16px; padding: 6px;
+            background: rgba(10,10,10,0.85); border-radius: 16px; padding: 6px;
             display: flex; align-items: center; position: relative; overflow: hidden; z-index: 1;
+            transition: box-shadow 0.3s ease;
         }
         .sbox::before {
             content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
@@ -190,20 +233,27 @@
             backdrop-filter: blur(24px);
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .sbox:focus-within::before { background: conic-gradient(transparent, transparent, var(--acc2), var(--acc)); animation: spin 1.5s linear infinite; }
+        /* GLOW ON FOCUS */
+        .sbox:focus-within {
+            box-shadow: 0 0 25px rgba(255,61,0,0.4);
+        }
+        .sbox:focus-within::before { 
+            background: conic-gradient(transparent, transparent, var(--acc2), var(--acc)); 
+            animation: spin 1.5s linear infinite; 
+        }
         .sicon, .sinput, .sbtn { position: relative; z-index: 2; }
-        .sicon { left: 24px; top: 50%; transform: translateY(-50%); color: #555; width: 18px; height: 18px; flex-shrink: 0; pointer-events: none; position: absolute; }
+        .sicon { left: 24px; top: 50%; transform: translateY(-50%); color: #666; width: 18px; height: 18px; flex-shrink: 0; pointer-events: none; position: absolute; }
         .sinput { flex: 1; background: transparent; border: none; outline: none; padding: 14px 16px 14px 48px; font-family: 'Montserrat', sans-serif; font-size: 15px; color: #fff; min-width: 0; }
-        .sinput::placeholder { color: #555; }
+        .sinput::placeholder { color: #666; }
         .sbtn {
             background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff;
             font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
             padding: 12px 28px; border-radius: 10px; border: none;
-            box-shadow: 0 4px 15px rgba(255,61,0,0.2);
+            box-shadow: 0 4px 15px rgba(255,61,0,0.25);
             transition: box-shadow 0.2s ease, transform 0.2s ease;
             flex-shrink: 0; white-space: nowrap; margin-right: 2px; cursor: pointer;
         }
-        .sbtn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,61,0,0.35); }
+        .sbtn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,61,0,0.45); }
         .sbtn:active { transform: scale(0.97); }
 
         /* ── Ticker Section ── */
@@ -246,25 +296,16 @@
             border-radius: 50px; cursor: pointer;
             transition: background 0.3s ease, transform 0.3s ease;
         }
-        .ticker-item:hover {
-            background: rgba(255,255,255,0.05); transform: translateY(-2px);
-        }
-        .ticker-title { 
-            font-family: 'Bebas Neue', sans-serif; font-size: 20px; 
-            color: var(--t2); transition: color 0.3s ease, text-shadow 0.3s ease; letter-spacing: 0.5px; 
-        }
-        .ticker-item:hover .ticker-title { 
-            color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.1);
-        }
+        .ticker-item:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        .ticker-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--t2); transition: color 0.3s ease, text-shadow 0.3s ease; letter-spacing: 0.5px; }
+        .ticker-item:hover .ticker-title { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
         .ticker-cat {
             font-size: 8px; font-weight: 700; letter-spacing: 1.5px; color: var(--acc);
             background: rgba(255,61,0,0.08); border: 1px solid rgba(255,61,0,0.15);
             padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
             transition: box-shadow 0.3s ease, background 0.3s ease;
         }
-        .ticker-item:hover .ticker-cat {
-            box-shadow: 0 0 8px rgba(255,61,0,0.3); background: rgba(255,61,0,0.15); color: #fff;
-        }
+        .ticker-item:hover .ticker-cat { box-shadow: 0 0 8px rgba(255,61,0,0.3); background: rgba(255,61,0,0.15); color: #fff; }
         .ticker-sep { color: var(--bdr); font-size: 12px; margin-left: 10px; pointer-events: none;}
         @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
@@ -273,9 +314,7 @@
             padding: 40px 16px 0; position: relative; z-index: 5;
             max-width: 1500px; margin: 0 auto;
         }
-        .pills {
-            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; 
-        }
+        .pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .pill {
             border: 1px solid var(--bdr); border-radius: 100px; padding: 8px 20px;
             font-size: 11px; font-weight: 600; color: var(--t2); background: transparent;
@@ -325,8 +364,8 @@
             transition: border-color 0.3s ease;
         }
         .poster img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), filter 0.4s; }
-        .mcard:hover .poster { border-color: rgba(255,61,0,0.35); }
-        .mcard:hover .poster img { transform: scale(1.08); filter: brightness(0.5); }
+        .mcard:hover .poster { border-color: rgba(255,61,0,0.4); }
+        .mcard:hover .poster img { transform: scale(1.08); filter: brightness(0.6); }
 
         .govl {
             position: absolute; inset: 0;
@@ -360,14 +399,14 @@
         }
         .mcard:hover .cinfo {
             transform: translateZ(32px);
-            border-color: rgba(255,61,0,0.3);
-            box-shadow: 0 28px 56px rgba(0,0,0,0.7), 0 0 0 0 transparent;
+            border-color: rgba(255,61,0,0.4);
+            box-shadow: 0 28px 56px rgba(0,0,0,0.8), 0 0 0 0 transparent;
             background: rgba(12,12,12,0.98);
         }
 
         .ctitle {
             font-family: 'Bebas Neue', sans-serif; font-size: 18px;
-            line-height: 1.15; letter-spacing: 0.5px;
+            line-height: 1.15; letter-spacing: 0.5px; color: #f0f0f0;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
             overflow: hidden; margin-bottom: 5px;
             transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), text-shadow 0.3s;
@@ -381,51 +420,15 @@
             background: linear-gradient(135deg, var(--acc), var(--acc2));
             color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 14px;
             letter-spacing: 1px; border: none; border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(255,61,0,0.15);
+            box-shadow: 0 4px 15px rgba(255,61,0,0.25);
             display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s;
         }
 
-        .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .mcard:hover .ctitle { transform: translateZ(20px); text-shadow: 0 4px 10px rgba(0,0,0,0.8); color: #fff; }
         .mcard:hover .cmeta  { transform: translateZ(10px); }
-        .mcard:hover .cbot   { transform: translateZ(28px); box-shadow: 0 10px 24px rgba(255,61,0,0.35); }
+        .mcard:hover .cbot   { transform: translateZ(28px); box-shadow: 0 10px 24px rgba(255,61,0,0.4); }
         .cbot:active { transform: scale(0.97); }
-
-        /* ── Quality Modal (NEW) ── */
-        .qmodal {
-            position: fixed; inset: 0; z-index: 10500;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: all 0.4s ease;
-        }
-        .qmodal.vis { opacity: 1; visibility: visible; }
-        .qbox {
-            background: var(--card); border: 1px solid #222;
-            padding: 32px; border-radius: 16px; width: 90%; max-width: 360px;
-            text-align: center; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
-            position: relative;
-        }
-        .qmodal.vis .qbox { transform: translateY(0); }
-        .qclose {
-            position: absolute; top: 12px; right: 12px;
-            background: rgba(255,255,255,0.05); border: none; color: var(--t2);
-            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .qclose:hover { background: var(--acc); color: #fff; }
-        .qtitle { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 6px; color: #fff; letter-spacing: 1.5px; }
-        .qsub { font-size: 12px; color: var(--t2); margin-bottom: 24px; }
-        .qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .qbtn {
-            background: linear-gradient(135deg, #151515, #0a0a0a); border: 1px solid var(--bdr);
-            color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
-            padding: 16px 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
-        }
-        .qbtn:hover { 
-            border-color: var(--acc); background: rgba(255,61,0,0.1); 
-            transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255,61,0,0.15); 
-        }
 
         /* ── Skeleton Cards ── */
         .skel { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; overflow: hidden; }
@@ -437,8 +440,8 @@
 
         /* ── No Results ── */
         .nores { grid-column: 1/-1; text-align: center; padding: 80px 20px; }
-        .nores h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px,10vw,64px); color: #1a1a1a; margin-bottom: 12px; }
-        .nores p { color: #444; font-size: 14px; margin-bottom: 28px; }
+        .nores h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px,10vw,64px); color: #222; margin-bottom: 12px; }
+        .nores p { color: #666; font-size: 14px; margin-bottom: 28px; }
         .nores-btn {
             background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #fff; border: none; cursor: pointer;
             padding: 14px 32px; border-radius: 8px; font-family: 'Bebas Neue', sans-serif;
@@ -463,7 +466,7 @@
         .flink { display: block; padding: 9px 0; font-size: 12px; color: var(--t2); text-decoration: none; border-bottom: 1px solid var(--bdr); transition: all 0.2s ease; }
         .flink:last-child { border-bottom: none; }
         .flink:hover { color: var(--acc); padding-left: 10px; }
-        .fdis { font-size: 11px; color: #333; line-height: 1.9; font-style: italic; }
+        .fdis { font-size: 11px; color: #444; line-height: 1.9; font-style: italic; }
         .fbot {
             max-width: 1200px; margin: 52px auto 0; padding-top: 24px; border-top: 1px solid var(--bdr);
             display: flex; justify-content: space-between; font-size: 10px; color: var(--t3);
@@ -494,7 +497,7 @@
             .nbtn { padding: 8px 16px; font-size: 13px; }
             .nsrch { opacity: 1 !important; pointer-events: all !important; transform: scale(1) !important; }
             .hero { padding: 120px 16px 40px; }
-            .badge { font-size: 8px; padding: 6px 14px; letter-spacing: 1.5px; }
+            .badge { font-size: 9px; padding: 8px 16px; letter-spacing: 1.5px; }
             .sbar { padding: 0 8px; }
             .sbox { padding: 4px; }
             .sinput { padding: 12px 12px 12px 42px; font-size: 14px; }
@@ -506,6 +509,8 @@
             .pills-section { padding-top: 30px; }
             .msec { padding: 40px 16px 60px; }
             .mhdr { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .qbox { padding: 24px 16px; max-width: 320px; }
+            .qtitle { font-size: 24px; }
             .fgrid { grid-template-columns: 1fr; gap: 36px; text-align: center; }
             .ftagline { max-width: none; margin: 12px auto 0; }
             .sicons { justify-content: center; }
@@ -533,13 +538,11 @@
     <div class="qmodal" id="qmodal">
         <div class="qbox">
             <button class="qclose" id="qclose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-            <div class="qtitle">SELECT QUALITY</div>
-            <div class="qsub">Choose your preferred resolution</div>
-            <div class="qgrid">
-                <button class="qbtn" data-q="480p">480p (SD)</button>
-                <button class="qbtn" data-q="720p">720p (HD)</button>
-                <button class="qbtn" data-q="1080p">1080p (FHD)</button>
-                <button class="qbtn" data-q="2160p">4K (UHD)</button>
+            <div class="qtitle" id="m-title">SELECT OPTION</div>
+            <div class="qsub" id="m-sub">Choose quality or episode to open Telegram</div>
+            <div class="qgrid-wrapper">
+                <div class="qgrid" id="m-grid">
+                    </div>
             </div>
         </div>
     </div>
@@ -572,7 +575,8 @@
     <section class="hero" id="hero">
         <div class="grain"></div>
         <div class="hcontent" id="hc">
-            <div class="badge">🎬 MOVIES &amp; WEB SERIES — CONNECT TO CINE UNDERGROUND</div>
+            <div class="badge">🎬 MOVIES &amp; WEB SERIES <span style="margin: 0 2px; opacity: 0.7;">✖</span> CINE UNDERGROUND</div>
+            
             <div class="headline">
                 FIND YOUR<br>
                 NEXT <span class="flip-wrap"><span id="fw" class="flip-word">OBSESSION</span></span>
@@ -681,26 +685,24 @@
             REFRESH: 300000
         };
 
-        // ═══ SAMPLE DATA ═══
+        // ═══ SAMPLE DATA (Notice 'links' column format: Label::keyword | Label2::keyword2) ═══
         const SAMPLE = [
-            { title: "Challengers",               category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "challengers" },
-            { title: "Dune: Part Two",             category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "dune-part-two" },
-            { title: "Furiosa",                    category: "HOLLYWOOD",   year: "2024", language: "EN", deeplink_keyword: "furiosa" },
-            { title: "Baby Reindeer",              category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "baby-reindeer" },
-            { title: "Shogun",                     category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "shogun" },
-            { title: "RRR",                        category: "SOUTH",       year: "2022", language: "TE", deeplink_keyword: "rrr" },
-            { title: "Oppenheimer",                category: "HOLLYWOOD",   year: "2023", language: "EN", deeplink_keyword: "oppenheimer" },
-            { title: "Pathaan",                    category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "pathaan" },
-            { title: "The Bear",                   category: "WEB SERIES",  year: "2024", language: "EN", deeplink_keyword: "the-bear" },
-            { title: "Killers of the Flower Moon", category: "HOLLYWOOD",   year: "2023", language: "EN", deeplink_keyword: "killers-flower-moon" },
-            { title: "Animal",                     category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "animal" },
-            { title: "Mirzapur",                   category: "WEB SERIES",  year: "2023", language: "HI", deeplink_keyword: "mirzapur" },
-            { title: "Jawan",                      category: "BOLLYWOOD",   year: "2023", language: "HI", deeplink_keyword: "jawan" },
-            { title: "Pushpa 2",                   category: "SOUTH",       year: "2024", language: "TE", deeplink_keyword: "pushpa2" },
-            { title: "Demon Slayer",               category: "ANIME",       year: "2024", language: "JP", deeplink_keyword: "demon-slayer" },
-            { title: "Attack on Titan",            category: "ANIME",       year: "2023", language: "JP", deeplink_keyword: "aot" },
-            { title: "KGF Chapter 2",              category: "DUBBED",      year: "2022", language: "HI", deeplink_keyword: "kgf2" },
-            { title: "Kalki 2898 AD",              category: "SOUTH",       year: "2024", language: "TE", deeplink_keyword: "kalki" }
+            { title: "Challengers", category: "HOLLYWOOD", year: "2024", language: "EN", deeplink_keyword: "challengers", links: "480p::chal_480|720p::chal_720|1080p::chal_1080" },
+            { title: "Dune: Part Two", category: "HOLLYWOOD", year: "2024", language: "EN", deeplink_keyword: "dune-part-two" },
+            { title: "Furiosa", category: "HOLLYWOOD", year: "2024", language: "EN", deeplink_keyword: "furiosa" },
+            { title: "Baby Reindeer", category: "WEB SERIES", year: "2024", language: "EN", deeplink_keyword: "baby-reindeer" },
+            { title: "Shogun", category: "WEB SERIES", year: "2024", language: "EN", deeplink_keyword: "shogun", links: "S1 EP 1::shogun_e1|S1 EP 2::shogun_e2|S1 EP 3::shogun_e3|BATCH ZIP::shogun_batch" },
+            { title: "RRR", category: "SOUTH", year: "2022", language: "TE", deeplink_keyword: "rrr", links: "720p::rrr_720|1080p::rrr_1080|4K UHD::rrr_4k" },
+            { title: "Oppenheimer", category: "HOLLYWOOD", year: "2023", language: "EN", deeplink_keyword: "oppenheimer" },
+            { title: "Pathaan", category: "BOLLYWOOD", year: "2023", language: "HI", deeplink_keyword: "pathaan" },
+            { title: "The Bear", category: "WEB SERIES", year: "2024", language: "EN", deeplink_keyword: "the-bear" },
+            { title: "Killers of the Flower Moon", category: "HOLLYWOOD", year: "2023", language: "EN", deeplink_keyword: "killers-flower-moon" },
+            { title: "Animal", category: "BOLLYWOOD", year: "2023", language: "HI", deeplink_keyword: "animal" },
+            { title: "Mirzapur", category: "WEB SERIES", year: "2023", language: "HI", deeplink_keyword: "mirzapur" },
+            { title: "Jawan", category: "BOLLYWOOD", year: "2023", language: "HI", deeplink_keyword: "jawan" },
+            { title: "Pushpa 2", category: "SOUTH", year: "2024", language: "TE", deeplink_keyword: "pushpa2" },
+            { title: "Demon Slayer", category: "ANIME", year: "2024", language: "JP", deeplink_keyword: "demon-slayer" },
+            { title: "Attack on Titan", category: "ANIME", year: "2023", language: "JP", deeplink_keyword: "aot" }
         ];
 
         // ═══ STATE ═══
@@ -709,7 +711,6 @@
         let tCamX = 0, tCamY = 5;
         let mWorld = { x: 0, y: 0, z: 0 };
         let lenis = null;
-        let currentBotKeyword = '';
 
         // ═══ UTILS ═══
         function lerp(a, b, t) { return a * (1 - t) + b * t; }
@@ -745,7 +746,7 @@
             }
         };
 
-        // ═══ CYBER-WAVE 3D BACKGROUND ═══
+        // ═══ CYBER-WAVE 3D BACKGROUND (Optimized for all devices) ═══
         function initThree() {
             const canvas = document.getElementById('bg');
             const isMob = window.innerWidth < 768;
@@ -757,15 +758,16 @@
             cam.position.set(0, 5, 12);
             cam.lookAt(0, -2, 0);
 
+            // Antialias true for desktop, false for mobile to save performance
             renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMob, alpha: true, powerPreference: 'high-performance' });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(devicePixelRatio, isMob ? 1 : 2));
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMob ? 1 : 1.5));
 
             pGroup = new THREE.Group();
             scene.add(pGroup);
 
-            const gridX = isMob ? 35 : 70;
-            const gridZ = isMob ? 35 : 70;
+            const gridX = isMob ? 30 : 65;
+            const gridZ = isMob ? 30 : 65;
             const pCount = gridX * gridZ;
             const pA = new Float32Array(pCount * 3);
             const cA = new Float32Array(pCount * 3);
@@ -826,6 +828,7 @@
             pGroup.add(new THREE.Points(g, mat));
 
             window.addEventListener('mousemove', (e) => {
+                if (isMob) return; // Skip heavy tracking on mobile
                 const x = (e.clientX / window.innerWidth) * 2 - 1;
                 const y = -(e.clientY / window.innerHeight) * 2 + 1;
                 mWorld = { x: x * 20, z: -y * 20 };
@@ -838,13 +841,17 @@
                 const dt = Math.min((now - lastTime) / 16, 2);
                 lastTime = now; t += 0.016 * dt;
                 requestAnimationFrame(animate);
-                cam.position.x = lerp(cam.position.x, tCamX, 0.05);
-                cam.position.y = lerp(cam.position.y, tCamY, 0.05);
+                
+                if (!isMob) {
+                    cam.position.x = lerp(cam.position.x, tCamX, 0.05);
+                    cam.position.y = lerp(cam.position.y, tCamY, 0.05);
+                }
                 cam.lookAt(0, -2, 0);
                 pGroup.rotation.y = Math.sin(t*0.2) * 0.1;
+                
                 if (pUni) {
                     pUni.uTime.value = t;
-                    pUni.uMouse.value.lerp(new THREE.Vector2(mWorld.x, mWorld.z), 0.1);
+                    if (!isMob) pUni.uMouse.value.lerp(new THREE.Vector2(mWorld.x, mWorld.z), 0.1);
                 }
                 renderer.render(scene, cam);
             }
@@ -1018,38 +1025,63 @@
             renderCards();
         }
 
-        // ═══ GLOBAL OPENS MODAL ═══
-        window.openQualityModal = function(keyword) {
-            currentBotKeyword = keyword;
+        // ═══ DYNAMIC QUALITY MODAL LOGIC ═══
+        window.openQualityModal = function(movieId) {
+            const m = movies.find(x => x.id === movieId);
+            if (!m) return;
+            
+            document.getElementById('m-title').textContent = m.title;
+            const grid = document.getElementById('m-grid');
+            grid.innerHTML = ''; // Clear purane buttons
+
+            let buttonsData = [];
+            
+            // Check if Sheet has provided dynamic links
+            if (m.links && m.links.trim() !== '') {
+                // Sheet format expected: Label::keyword | Label2::keyword2
+                const segments = m.links.split('|');
+                segments.forEach(seg => {
+                    const parts = seg.split('::');
+                    if (parts.length >= 1) {
+                        buttonsData.push({
+                            label: parts[0].trim(),
+                            kw: parts.length > 1 ? parts[1].trim() : parts[0].trim()
+                        });
+                    }
+                });
+            } else {
+                // Fallback to default generic single button if nothing specific is provided
+                buttonsData.push({ label: 'GET LINK', kw: m.deeplink_keyword });
+            }
+
+            // Create buttons dynamically
+            buttonsData.forEach(data => {
+                const btn = document.createElement('button');
+                btn.className = 'qbtn';
+                btn.textContent = data.label;
+                btn.onclick = () => {
+                    const botUsername = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
+                    const deeplink = `https://t.me/${botUsername}?start=${encodeURIComponent(data.kw)}`;
+                    window.open(deeplink, '_blank');
+                    document.getElementById('qmodal').classList.remove('vis');
+                    SFX.click();
+                };
+                grid.appendChild(btn);
+            });
+
             document.getElementById('qmodal').classList.add('vis');
             SFX.click();
         };
 
-        // ═══ QUALITY MODAL LOGIC ═══
         function initQualityModal() {
             const modal = document.getElementById('qmodal');
             const closeBtn = document.getElementById('qclose');
 
             closeBtn.addEventListener('click', () => { modal.classList.remove('vis'); SFX.click(); });
             modal.addEventListener('click', (e) => { if(e.target === modal) { modal.classList.remove('vis'); } });
-
-            document.querySelectorAll('.qbtn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const quality = btn.getAttribute('data-q');
-                    const botUsername = CONFIG.BOT === 'REPLACE_BOT_USERNAME' ? 'cineundergroundbot' : CONFIG.BOT;
-                    
-                    // Creates deeplink: ?start=keyword_quality (e.g. ?start=animal_1080p)
-                    // P.S. Agar bot ka format alag hai, toh format ko yaha edit kar lena bhai
-                    const deeplink = `https://t.me/${botUsername}?start=${encodeURIComponent(currentBotKeyword)}_${quality}`;
-                    
-                    window.open(deeplink, '_blank');
-                    modal.classList.remove('vis');
-                    SFX.click();
-                });
-            });
         }
 
-        // ═══ TICKER (Now Triggers Modal) ═══
+        // ═══ TICKER ═══
         function updateTicker(data) {
             const ticker = document.getElementById('ticker');
             if (!ticker || !data.length) return;
@@ -1057,7 +1089,7 @@
             const latestData = [...data].sort((a,b) => (parseInt(b.year)||0) - (parseInt(a.year)||0)).slice(0, 15);
 
             const items = latestData.map(m => `
-                <div class="ticker-item" onclick="openQualityModal('${m.deeplink_keyword}')">
+                <div class="ticker-item" onclick="openQualityModal(${m.id})">
                     <span class="ticker-cat">${m.category || 'NEW'}</span>
                     <span class="ticker-title">${m.title}</span>
                     <span class="ticker-sep">◆</span>
@@ -1084,9 +1116,8 @@
             }
         }
 
-        // ═══ FETCH POSTER (Updated with TMDB Year Query) ═══
+        // ═══ FETCH POSTER ═══
         async function fetchPoster(title, year) {
-            // Updated Cache key to include year so old cached images don't clash
             const yearStr = year ? `-${year}` : '';
             const key = CONFIG.POSTER + title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + yearStr;
             
@@ -1095,11 +1126,8 @@
             await new Promise(r => setTimeout(r, 80));
             
             try {
-                // Modified URL to include primary_release_year if year is provided in sheet
                 let apiUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${CONFIG.TMDB}&language=en-US`;
-                if (year && !isNaN(parseInt(year))) {
-                    apiUrl += `&primary_release_year=${parseInt(year)}`;
-                }
+                if (year && !isNaN(parseInt(year))) { apiUrl += `&primary_release_year=${parseInt(year)}`; }
 
                 const response = await fetch(apiUrl, { signal: AbortSignal.timeout(5000) });
                 const json = await response.json();
@@ -1126,6 +1154,7 @@
             }
 
             filtered.forEach((m, i) => {
+                // Keep div's index separate from internal m.id for stable DOM IDs
                 const card = document.createElement('div');
                 card.className = 'mcard';
                 card.innerHTML = `
@@ -1137,7 +1166,7 @@
                     <div class="cinfo">
                         <div class="ctitle">${m.title}</div>
                         <div class="cmeta">${m.year || ''} • ${m.language || ''}</div>
-                        <button class="cbot" onclick="openQualityModal('${m.deeplink_keyword}')">🔗 GET LINK</button>
+                        <button class="cbot" onclick="openQualityModal(${m.id})">🔗 GET LINK</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -1148,7 +1177,6 @@
 
             for (let i = 0; i < filtered.length; i++) {
                 const m = filtered[i]; const el = document.getElementById('p' + i); if (!el) continue;
-                // Passed m.year to fetchPoster to ensure the correct movie is fetched
                 const url = await fetchPoster(m.title, m.year);
                 if (url) {
                     const img = document.createElement('img');
@@ -1201,7 +1229,10 @@
                     try { const cached = localStorage.getItem(CONFIG.CACHE); if (cached) data = JSON.parse(cached); } catch(e2) {}
                 }
             }
-            movies = data; filtered = [...movies];
+            
+            // Assign unique ID to each movie entry for accurate modal mapping
+            movies = data.map((m, index) => ({ ...m, id: index }));
+            filtered = [...movies];
             document.getElementById('cnt').textContent = `Showing ${filtered.length} films`;
 
             updateTicker(movies);
@@ -1235,7 +1266,7 @@
             initSearch();
             initFlip();
             initMagnetic();
-            initQualityModal(); // NEW MODAL INIT
+            initQualityModal();
             initLinks();
             fetchData();
 
